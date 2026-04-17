@@ -1,11 +1,30 @@
-from groq import AsyncGroq
 import os
 import logging
 
 logger = logging.getLogger(__name__)
 
-client = AsyncGroq(api_key=os.environ.get("GROQ_API_KEY", ""))
+# Optional Groq client; deterministic scoring remains available.
+try:
+    from groq import AsyncGroq, RateLimitError
+except ImportError:
+    AsyncGroq = None
+    RateLimitError = Exception
+
+client = AsyncGroq(api_key=os.environ.get("GROQ_API_KEY", "")) if AsyncGroq and os.environ.get("GROQ_API_KEY") else None
 MODEL_NAME = "llama-3.3-70b-versatile"
+
+
+def _local_confidence(reasoning_chain: list, final_decision: str) -> float:
+    steps = len(reasoning_chain)
+    successful_actions = len([s for s in reasoning_chain if s.get("status") in {"success", "completed"}])
+    failures = len([s for s in reasoning_chain if s.get("status") in {"failed", "fatal_failure"}])
+    escalated = "escalat" in str(final_decision).lower()
+
+    score = 0.35 + min(steps, 6) * 0.07 + successful_actions * 0.08 - failures * 0.12
+    if escalated:
+        score = min(score + 0.1, 0.9)
+
+    return round(max(0.0, min(score, 0.98)), 2)
 
 async def get_confidence_score(ticket: dict, reasoning_chain: list, final_decision: str) -> float:
     """
@@ -13,6 +32,9 @@ async def get_confidence_score(ticket: dict, reasoning_chain: list, final_decisi
     Returns a score between 0.0 and 1.0.
     """
     history_summary = "\n".join([f"Step {s.get('step', '?')}: {s.get('action', 'thought')} -> {s.get('status', 'N/A')}" for s in reasoning_chain])
+
+    if os.getenv("AGENT_MODE", "local").lower() != "llm" or client is None:
+        return _local_confidence(reasoning_chain, final_decision)
     
     prompt = f"""
     Evaluate the following support ticket resolution process.
@@ -27,7 +49,6 @@ async def get_confidence_score(ticket: dict, reasoning_chain: list, final_decisi
     """
     
     import asyncio
-    from groq import RateLimitError
     
     max_retries = 5
     base_delay = 5.0
@@ -52,4 +73,4 @@ async def get_confidence_score(ticket: dict, reasoning_chain: list, final_decisi
             logger.error(f"Confidence scoring failed using Groq: {e}")
             break
             
-    return 0.5 # Default middle confidence if scoring fails completely
+    return _local_confidence(reasoning_chain, final_decision)

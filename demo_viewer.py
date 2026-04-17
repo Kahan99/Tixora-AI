@@ -64,7 +64,10 @@ def print_audit_log(ticket_id=None):
             print(f"  {Colors.BOLD}Step {step_num}:{Colors.ENDC}")
             print(f"    {Colors.CYAN}THOUGHT:{Colors.ENDC} {thought}")
             print(f"    {Colors.WARNING}ACTION:{Colors.ENDC} {action} {retries_str}")
-            print(f"    {Colors.GET_OBSERVATION}OBS:{Colors.ENDC} {obs}\n".replace(f"{Colors.GET_OBSERVATION}", f"{Colors.GREEN}"))
+            print(f"    {Colors.GREEN}OBS:{Colors.ENDC} {obs}")
+
+            status = step.get("status", "N/A")
+            print(f"    {Colors.BLUE}STATUS:{Colors.ENDC} {status}\n")
 
         print("-" * 60 + "\n")
 

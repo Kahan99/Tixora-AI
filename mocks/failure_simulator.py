@@ -17,23 +17,23 @@ async def simulate_failure(tool_name, data):
     
     # 2. Hard Timeout (15% chance - network drop)
     if chance < 0.15:
-        logger.warning(f"[CHAOS] TIMEOUT for {tool_name}")
-        await asyncio.sleep(5) # Delay then break
-        raise asyncio.TimeoutError(f"Network Timeout on {tool_name} after 5.0s")
+        logger.debug(f"[CHAOS] TIMEOUT for {tool_name}")
+        await asyncio.sleep(1.0) # Delay then break
+        raise asyncio.TimeoutError(f"Network Timeout on {tool_name} after 1.0s")
         
     # 3. HTTP Server Error (10% chance)
     if chance < 0.25:
-        logger.warning(f"[CHAOS] 502 Bad Gateway for {tool_name}")
+        logger.debug(f"[CHAOS] 502 Bad Gateway for {tool_name}")
         raise ConnectionError(f"502 Bad Gateway: Upstream server for {tool_name} unavailable")
     
     # 4. Malformed Data Structure (15% chance - schema mismatch)
     if chance < 0.40:
-        logger.warning(f"[CHAOS] MALFORMED DATA for {tool_name}")
+        logger.debug(f"[CHAOS] MALFORMED DATA for {tool_name}")
         return {"corrupted": "unreadable_binary_data", "status_code": 200}
     
     # 5. Partial Data Loss (10% chance - missing keys)
     if chance < 0.50:
-        logger.warning(f"[CHAOS] PARTIAL DATA for {tool_name}")
+        logger.debug(f"[CHAOS] PARTIAL DATA for {tool_name}")
         if isinstance(data, dict) and data:
             partial_data = data.copy()
             # Randomly delete half the keys

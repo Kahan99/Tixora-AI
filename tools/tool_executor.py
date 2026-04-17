@@ -21,18 +21,25 @@ async def execute_tool(tool_func, **kwargs):
             result = await tool_func(**kwargs)
             
             # --- ADVANCED VALIDATION STAGE ---
-            if not isinstance(result, dict):
+            if tool_func.__name__ == "search_knowledge_base":
+                if not isinstance(result, (dict, list)):
+                    raise ValueError(f"CRITICAL: search_knowledge_base returned invalid type: {type(result)}")
+            elif not isinstance(result, dict):
                 raise ValueError(f"CRITICAL: Tool returned non-dict type: {type(result)}")
             
-            if "corrupted" in result or result.get("status_code") == 500:
-                raise ValueError("CRITICAL: Upstream API returned corrupted schema")
-            
-            # Catch simulated "Partial Data" (if standard keys are suddenly missing)
-            # This teaches the LLM that tools must return complete objects
-            if tool_func.__name__ == "get_order" and "status" not in result and "error" not in result:
-                raise ValueError("CRITICAL: get_order response missing required 'status' key (Partial Data Loss)")
-            if tool_func.__name__ == "get_customer" and "tier" not in result and "error" not in result:
-                raise ValueError("CRITICAL: get_customer response missing required 'tier' key (Partial Data Loss)")
+            if isinstance(result, dict):
+                if "corrupted" in result or result.get("status_code") == 500:
+                    raise ValueError("CRITICAL: Upstream API returned corrupted schema")
+
+            # Partial data is recoverable for this agent; keep it as a soft signal.
+            if isinstance(result, dict):
+                missing_keys = []
+                if tool_func.__name__ == "get_order" and "status" not in result and "error" not in result:
+                    missing_keys.append("status")
+                if tool_func.__name__ == "get_customer" and "tier" not in result and "error" not in result:
+                    missing_keys.append("tier")
+                if missing_keys:
+                    logger.debug("Partial data from %s missing keys: %s", tool_func.__name__, ", ".join(missing_keys))
 
             log_entry = {
                 "attempt": attempt,
@@ -43,7 +50,10 @@ async def execute_tool(tool_func, **kwargs):
             return result, attempts
 
         except (asyncio.TimeoutError, ValueError, Exception) as e:
-            logger.warning(f"Attempt {attempt} failed for {tool_func.__name__}: {str(e)}")
+            if attempt < max_retries:
+                logger.debug(f"Attempt {attempt} failed for {tool_func.__name__}: {str(e)}")
+            else:
+                logger.warning(f"Tool {tool_func.__name__} failed after {max_retries} attempts: {str(e)}")
             log_entry = {
                 "attempt": attempt,
                 "status": "failed",
