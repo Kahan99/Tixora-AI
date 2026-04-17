@@ -64,7 +64,7 @@ async def main():
         loaded = json.load(f)
         tickets = loaded[:max_tickets] if max_tickets > 0 else loaded
     
-    print(f"Starting async processing of {len(tickets)} tickets...")
+    print(f"--- Tixora-AI Orchestrator ---\nStarting async processing of {len(tickets)} tickets...")
     start_time = time.time()
     
     # Process concurrently with a tunable cap.
@@ -100,8 +100,8 @@ async def main():
     success_count = len([r for r in normalized_results if r.get("status") == "success"])
     failed_count = len(normalized_results) - success_count
     
-    print(f"Finished. Audit log saved to logs/audit_log.json")
-    print(f"Summary: success={success_count}, failed={failed_count}, total={len(normalized_results)}, duration={total_time:.2f}s")
+    print(f"Tixora-AI: Processing Finished. Audit log saved to logs/audit_log.json")
+    print(f"Final Report: success={success_count}, failed={failed_count}, total={len(normalized_results)}, duration={total_time:.2f}s")
 
 if __name__ == "__main__":
     asyncio.run(main())

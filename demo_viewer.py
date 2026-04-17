@@ -34,7 +34,7 @@ def print_audit_log(ticket_id=None):
             print(f"{Colors.FAIL}Error: Ticket {ticket_id} not found in logs.{Colors.ENDC}")
             return
 
-    print(f"\n{Colors.HEADER}{Colors.BOLD}--- AGENTIC SUPPORT EVALUATION LOGS ---{Colors.ENDC}\n")
+    print(f"\n{Colors.HEADER}{Colors.BOLD}--- TIXORA-AI: AGENTIC SUPPORT EVALUATION LOGS ---{Colors.ENDC}\n")
     print(f"Total Tickets Processed: {len(logs)}\n")
 
     for ticket in logs:
