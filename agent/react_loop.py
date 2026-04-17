@@ -1,9 +1,9 @@
 import json
 import asyncio
 import logging
-import google.generativeai as genai
+import os
 from pydantic import ValidationError
-from google.api_core.exceptions import ResourceExhausted
+from groq import AsyncGroq, RateLimitError
 
 from tools.read_tools import get_customer, get_order, get_product, search_knowledge_base
 from tools.write_tools import check_refund_eligibility, issue_refund, send_reply, escalate
@@ -13,10 +13,11 @@ from agent.confidence import get_confidence_score
 
 logger = logging.getLogger(__name__)
 
-model = genai.GenerativeModel('gemini-1.5-flash')
+client = AsyncGroq(api_key=os.environ.get("GROQ_API_KEY", ""))
+MODEL_NAME = "llama-3.3-70b-versatile"
 
-# Global semaphore to prevent instantly blowing past the 15 RPM limit
-gemini_semaphore = asyncio.Semaphore(15)
+# Groq is fast and allows 30 RPM on free tier, semaphore mitigates basic spikes
+gemini_semaphore = asyncio.Semaphore(5)
 
 # Tool registry
 TOOL_MAP = {
@@ -31,20 +32,24 @@ TOOL_MAP = {
 }
 
 async def _call_llm_with_retry(prompt: str) -> str:
-    """Calls Gemini with rate limit (429) backoff."""
+    """Calls Groq with rate limit backoff."""
     max_retries = 5
     base_delay = 5.0 # Wait 5 seconds on rate limit
 
     for attempt in range(max_retries):
         async with gemini_semaphore:
             try:
-                response = await model.generate_content_async(prompt)
-                return response.text
-            except ResourceExhausted:
-                logger.warning(f"Gemini Rate Limit (429) hit. Retrying in {base_delay * (2 ** attempt)}s...")
+                response = await client.chat.completions.create(
+                    model=MODEL_NAME,
+                    messages=[{"role": "user", "content": prompt}],
+                    response_format={"type": "json_object"}
+                )
+                return response.choices[0].message.content
+            except RateLimitError:
+                logger.warning(f"Groq Rate Limit (429) hit. Retrying in {base_delay * (2 ** attempt)}s...")
                 await asyncio.sleep(base_delay * (2 ** attempt))
             except Exception as e:
-                logger.error(f"Gemini API Error: {e}")
+                logger.error(f"Groq API Error: {e}")
                 raise e
     raise TimeoutError("Exceeded max retries for LLM due to rate limits.")
 

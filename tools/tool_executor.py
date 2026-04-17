@@ -20,9 +20,19 @@ async def execute_tool(tool_func, **kwargs):
             # Check for partial/malformed data simulations (mocked in the simulator)
             result = await tool_func(**kwargs)
             
-            # Basic validation: if result is malformed or missing key keys (simulated failure)
-            if isinstance(result, dict) and "corrupted" in result:
-                raise ValueError("Malformed response received")
+            # --- ADVANCED VALIDATION STAGE ---
+            if not isinstance(result, dict):
+                raise ValueError(f"CRITICAL: Tool returned non-dict type: {type(result)}")
+            
+            if "corrupted" in result or result.get("status_code") == 500:
+                raise ValueError("CRITICAL: Upstream API returned corrupted schema")
+            
+            # Catch simulated "Partial Data" (if standard keys are suddenly missing)
+            # This teaches the LLM that tools must return complete objects
+            if tool_func.__name__ == "get_order" and "status" not in result and "error" not in result:
+                raise ValueError("CRITICAL: get_order response missing required 'status' key (Partial Data Loss)")
+            if tool_func.__name__ == "get_customer" and "tier" not in result and "error" not in result:
+                raise ValueError("CRITICAL: get_customer response missing required 'tier' key (Partial Data Loss)")
 
             log_entry = {
                 "attempt": attempt,

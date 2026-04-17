@@ -1,20 +1,20 @@
 import json
 import logging
-import google.generativeai as genai
+from groq import AsyncGroq
 import os
 from agent.schemas import TicketClassification
 
 logger = logging.getLogger(__name__)
 
-# Initialize Gemini
-genai.configure(api_key=os.environ.get("GOOGLE_API_KEY", ""))
+# Initialize Groq
+client = AsyncGroq(api_key=os.environ.get("GROQ_API_KEY", ""))
 
-# Use Gemini 1.5 Flash for triage (fast, cheap)
-model = genai.GenerativeModel('gemini-1.5-flash')
+# Groq Mixtral or LLaMa-3 Models are ideal for reasoning
+MODEL_NAME = "llama-3.3-70b-versatile"
 
 async def classify_ticket(ticket: dict) -> dict:
     """
-    Classifies a ticket into categories, urgency, and resolvability using Gemini and Pydantic validation.
+    Classifies a ticket into categories, urgency, and resolvability using Groq and Pydantic validation.
     """
     prompt = f"""
     Analyze the following support ticket and provide a classification in strictly valid JSON format.
@@ -30,24 +30,39 @@ async def classify_ticket(ticket: dict) -> dict:
       "urgency": "high" | "medium" | "low",
       "resolvability": "auto" | "escalate"
     }}
-    
-    Return ONLY JSON. No markdown backticks, no explanations.
     """
     
-    try:
-        response = await model.generate_content_async(prompt)
-        text = response.text.replace("```json", "").replace("```", "").strip()
-        data = json.loads(text)
-        
-        # Validate with Pydantic
-        validated = TicketClassification(**data)
-        return validated.model_dump()
-        
-    except Exception as e:
-        logger.error(f"Classification failed: {e}. Output was: {response.text if 'response' in locals() else 'None'}")
-        return {
-            "category": "other",
-            "urgency": "medium",
-            "resolvability": "escalate",
-            "error": str(e)
-        }
+    import asyncio
+    from groq import RateLimitError
+    
+    max_retries = 5
+    base_delay = 5.0
+    
+    for attempt in range(max_retries):
+        try:
+            response = await client.chat.completions.create(
+                model=MODEL_NAME,
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"}
+            )
+            text = response.choices[0].message.content.strip()
+            data = json.loads(text)
+            
+            # Validate with Pydantic
+            validated = TicketClassification(**data)
+            return validated.model_dump()
+            
+        except RateLimitError:
+            logger.warning(f"Groq Rate Limit (429) in Classifier. Retrying in {base_delay * (2 ** attempt)}s...")
+            await asyncio.sleep(base_delay * (2 ** attempt))
+            
+        except Exception as e:
+            logger.error(f"Classification failed using Groq: {e}")
+            break
+            
+    return {
+        "category": "other",
+        "urgency": "medium",
+        "resolvability": "escalate",
+        "error": "Failed after max retries due to rate limits or API errors."
+    }

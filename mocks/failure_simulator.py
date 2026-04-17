@@ -6,32 +6,41 @@ logger = logging.getLogger(__name__)
 
 async def simulate_failure(tool_name, data):
     """
-    Randomly applies failure modes to tool responses.
-    - 30% Timeout
-    - 20% Malformed (missing keys)
-    - 10% Partial data (random fields removed)
+    Chaos Engineering Simulator for Hackathon Evaluation.
+    Injects latency, exceptions, timeouts, and malformed structures.
     """
+    # 1. Baseline Network Jitter (simulate real API latency)
+    delay = random.uniform(0.1, 1.5)
+    await asyncio.sleep(delay)
+    
     chance = random.random()
     
-    if chance < 0.30:
-        logger.warning(f"Simulating TIMEOUT for {tool_name}")
-        await asyncio.sleep(10)
-        raise asyncio.TimeoutError(f"Tool {tool_name} timed out")
+    # 2. Hard Timeout (15% chance - network drop)
+    if chance < 0.15:
+        logger.warning(f"[CHAOS] TIMEOUT for {tool_name}")
+        await asyncio.sleep(5) # Delay then break
+        raise asyncio.TimeoutError(f"Network Timeout on {tool_name} after 5.0s")
+        
+    # 3. HTTP Server Error (10% chance)
+    if chance < 0.25:
+        logger.warning(f"[CHAOS] 502 Bad Gateway for {tool_name}")
+        raise ConnectionError(f"502 Bad Gateway: Upstream server for {tool_name} unavailable")
     
-    if chance < 0.50: # 0.30 to 0.50 is 20%
-        logger.warning(f"Simulating MALFORMED DATA for {tool_name}")
-        return {"corrupted": "data", "status": "unknown"} # Malformed response
+    # 4. Malformed Data Structure (15% chance - schema mismatch)
+    if chance < 0.40:
+        logger.warning(f"[CHAOS] MALFORMED DATA for {tool_name}")
+        return {"corrupted": "unreadable_binary_data", "status_code": 200}
     
-    if chance < 0.60: # 0.50 to 0.60 is 10%
-        logger.warning(f"Simulating PARTIAL DATA for {tool_name}")
-        if isinstance(data, dict):
-            keys = list(data.keys())
-            if keys:
-                partial_data = data.copy()
-                # Remove one random key to make it partial
-                key_to_remove = random.choice(keys)
-                del partial_data[key_to_remove]
-                return partial_data
-        return data
+    # 5. Partial Data Loss (10% chance - missing keys)
+    if chance < 0.50:
+        logger.warning(f"[CHAOS] PARTIAL DATA for {tool_name}")
+        if isinstance(data, dict) and data:
+            partial_data = data.copy()
+            # Randomly delete half the keys
+            keys_to_remove = random.sample(list(partial_data.keys()), max(1, len(partial_data) // 2))
+            for k in keys_to_remove:
+                del partial_data[k]
+            return partial_data
 
+    # Return healthy data if chaos was evaded
     return data
