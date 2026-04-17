@@ -1,0 +1,202 @@
+[
+  {
+    "ticket_id": "TKT-1001",
+    "customer_email": "user1@example.com",
+    "subject": "Refund request for Order #ORD-2001",
+    "body": "I would like a refund for my recent order #ORD-2001. The item was damaged.",
+    "source": "email",
+    "created_at": "2026-04-17T11:41:42.510435",
+    "tier": "gold",
+    "expected_action": "refund"
+  },
+  {
+    "ticket_id": "TKT-1002",
+    "customer_email": "user2@example.com",
+    "subject": "Question about Product #PROD-3002",
+    "body": "Does the product #PROD-3002 come with a warranty?",
+    "source": "chat",
+    "created_at": "2026-04-16T00:41:42.510435",
+    "tier": "bronze",
+    "expected_action": "technical_support"
+  },
+  {
+    "ticket_id": "TKT-1003",
+    "customer_email": "user3@example.com",
+    "subject": "Refund request for Order #ORD-2003",
+    "body": "I would like a refund for my recent order #ORD-2003. The item was damaged.",
+    "source": "chat",
+    "created_at": "2026-04-16T17:41:42.510435",
+    "tier": "silver",
+    "expected_action": "refund"
+  },
+  {
+    "ticket_id": "TKT-1004",
+    "customer_email": "user4@example.com",
+    "subject": "Refund request for Order #ORD-2004",
+    "body": "I would like a refund for my recent order #ORD-2004. The item was damaged.",
+    "source": "email",
+    "created_at": "2026-04-16T16:41:42.510435",
+    "tier": "gold",
+    "expected_action": "refund"
+  },
+  {
+    "ticket_id": "TKT-1005",
+    "customer_email": "user5@example.com",
+    "subject": "Question about Product #PROD-3005",
+    "body": "Does the product #PROD-3005 come with a warranty?",
+    "source": "web",
+    "created_at": "2026-04-16T18:41:42.510435",
+    "tier": "gold",
+    "expected_action": "technical_support"
+  },
+  {
+    "ticket_id": "TKT-1006",
+    "customer_email": "user6@example.com",
+    "subject": "Refund request for Order #ORD-2006",
+    "body": "I would like a refund for my recent order #ORD-2006. The item was damaged.",
+    "source": "web",
+    "created_at": "2026-04-17T16:41:42.510435",
+    "tier": "gold",
+    "expected_action": "refund"
+  },
+  {
+    "ticket_id": "TKT-1007",
+    "customer_email": "user7@example.com",
+    "subject": "Where is my Order #ORD-2007?",
+    "body": "I haven't received my order #ORD-2007 yet. Please check the status.",
+    "source": "web",
+    "created_at": "2026-04-17T03:41:42.510435",
+    "tier": "bronze",
+    "expected_action": "check_status"
+  },
+  {
+    "ticket_id": "TKT-1008",
+    "customer_email": "user8@example.com",
+    "subject": "Refund request for Order #ORD-2008",
+    "body": "I would like a refund for my recent order #ORD-2008. The item was damaged.",
+    "source": "chat",
+    "created_at": "2026-04-16T18:41:42.510435",
+    "tier": "bronze",
+    "expected_action": "refund"
+  },
+  {
+    "ticket_id": "TKT-1009",
+    "customer_email": "user9@example.com",
+    "subject": "Refund request for Order #ORD-2009",
+    "body": "I would like a refund for my recent order #ORD-2009. The item was damaged.",
+    "source": "email",
+    "created_at": "2026-04-16T02:41:42.510435",
+    "tier": "silver",
+    "expected_action": "refund"
+  },
+  {
+    "ticket_id": "TKT-1010",
+    "customer_email": "user10@example.com",
+    "subject": "Poor service experience",
+    "body": "I am very disappointed with the delay in my previous support request.",
+    "source": "email",
+    "created_at": "2026-04-17T09:41:42.510435",
+    "tier": "gold",
+    "expected_action": "escalate"
+  },
+  {
+    "ticket_id": "TKT-1011",
+    "customer_email": "user11@example.com",
+    "subject": "Poor service experience",
+    "body": "I am very disappointed with the delay in my previous support request.",
+    "source": "email",
+    "created_at": "2026-04-16T15:41:42.510435",
+    "tier": "bronze",
+    "expected_action": "escalate"
+  },
+  {
+    "ticket_id": "TKT-1012",
+    "customer_email": "user12@example.com",
+    "subject": "Poor service experience",
+    "body": "I am very disappointed with the delay in my previous support request.",
+    "source": "chat",
+    "created_at": "2026-04-17T12:41:42.510435",
+    "tier": "bronze",
+    "expected_action": "escalate"
+  },
+  {
+    "ticket_id": "TKT-1013",
+    "customer_email": "user13@example.com",
+    "subject": "Where is my Order #ORD-2013?",
+    "body": "I haven't received my order #ORD-2013 yet. Please check the status.",
+    "source": "web",
+    "created_at": "2026-04-16T04:41:42.510435",
+    "tier": "gold",
+    "expected_action": "check_status"
+  },
+  {
+    "ticket_id": "TKT-1014",
+    "customer_email": "user14@example.com",
+    "subject": "Poor service experience",
+    "body": "I am very disappointed with the delay in my previous support request.",
+    "source": "chat",
+    "created_at": "2026-04-16T11:41:42.510435",
+    "tier": "gold",
+    "expected_action": "escalate"
+  },
+  {
+    "ticket_id": "TKT-1015",
+    "customer_email": "user15@example.com",
+    "subject": "Refund request for Order #ORD-2015",
+    "body": "I would like a refund for my recent order #ORD-2015. The item was damaged.",
+    "source": "chat",
+    "created_at": "2026-04-16T01:41:42.510435",
+    "tier": "silver",
+    "expected_action": "refund"
+  },
+  {
+    "ticket_id": "TKT-1016",
+    "customer_email": "user16@example.com",
+    "subject": "Where is my Order #ORD-2016?",
+    "body": "I haven't received my order #ORD-2016 yet. Please check the status.",
+    "source": "chat",
+    "created_at": "2026-04-17T03:41:42.510435",
+    "tier": "silver",
+    "expected_action": "check_status"
+  },
+  {
+    "ticket_id": "TKT-1017",
+    "customer_email": "user17@example.com",
+    "subject": "Where is my Order #ORD-2017?",
+    "body": "I haven't received my order #ORD-2017 yet. Please check the status.",
+    "source": "chat",
+    "created_at": "2026-04-16T22:41:42.510435",
+    "tier": "gold",
+    "expected_action": "check_status"
+  },
+  {
+    "ticket_id": "TKT-1018",
+    "customer_email": "user18@example.com",
+    "subject": "Question about Product #PROD-3018",
+    "body": "Does the product #PROD-3018 come with a warranty?",
+    "source": "chat",
+    "created_at": "2026-04-15T23:41:42.510435",
+    "tier": "gold",
+    "expected_action": "technical_support"
+  },
+  {
+    "ticket_id": "TKT-1019",
+    "customer_email": "user19@example.com",
+    "subject": "Refund request for Order #ORD-2019",
+    "body": "I would like a refund for my recent order #ORD-2019. The item was damaged.",
+    "source": "chat",
+    "created_at": "2026-04-16T19:41:42.510435",
+    "tier": "bronze",
+    "expected_action": "refund"
+  },
+  {
+    "ticket_id": "TKT-1020",
+    "customer_email": "user20@example.com",
+    "subject": "Refund request for Order #ORD-2020",
+    "body": "I would like a refund for my recent order #ORD-2020. The item was damaged.",
+    "source": "chat",
+    "created_at": "2026-04-16T14:41:42.510435",
+    "tier": "gold",
+    "expected_action": "refund"
+  }
+]
