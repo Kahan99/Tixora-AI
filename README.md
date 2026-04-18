@@ -10,33 +10,52 @@ Tixora-AI is ShopWave's autonomous support resolution engine. It processes suppo
 
 ```mermaid
 graph TD
-    subgraph "Ingestion Layer"
-        T[Batch Tickets JSON] --> M[main.py: asyncio.gather]
+    %% Styling Definitions
+    classDef default fill:#1e293b,stroke:#475569,stroke-width:2px,color:#f8fafc,rx:8px,ry:8px;
+    classDef layerBox fill:transparent,stroke:#334155,stroke-width:2px,stroke-dasharray: 5 5,color:#94a3b8;
+    classDef primary fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#ffffff,rx:8px,ry:8px;
+    classDef danger fill:#ef4444,stroke:#dc2626,stroke-width:2px,color:#ffffff,rx:8px,ry:8px;
+    classDef database fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#f8fafc;
+    classDef coreEngine fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:#ffffff,rx:8px,ry:8px;
+
+    %% Layers
+    subgraph IngestionLayer ["Ingestion Layer"]
+        T((Batch Tickets JSON)) --> M[main.py: asyncio.gather]
     end
-    subgraph "Cognitive Layer (Per Ticket)"
+
+    subgraph CognitiveLayer ["Cognitive Layer (Per Ticket)"]
         C[Classifier: Triage & Urgency]
-        A["Agent Core (Local Policy Engine)"]
+        A{"Agent Core (Local Policy Engine)"}:::coreEngine
         S[Pydantic Schema Enforcer]
+        
         M --> C
         C --> A
         A <-->|JSON Proposals| S
     end
-    subgraph "Execution Layer"
-        E["Tool Executor (Retry + Backoff)"]
-        F["Chaos Simulator (Latency, 502, Timeout)"]
+
+    subgraph ExecutionLayer ["Execution Layer"]
+        E["Tool Executor (Retry + Backoff)"]:::primary
+        F["Chaos Simulator (Latency, 502, Timeout)"]:::danger
+        DB[("Mock DBs (Orders/Customers/KB)")]:::database
+        
         S -->|Valid Actions| E
         E <--> F
-        F <-->|Mock DBs| DB[(Orders / Customers / KB)]
+        F <-->|Mock Queries| DB
     end
-    subgraph "Governance Layer"
+
+    subgraph GovernanceLayer ["Governance Layer"]
         G[Confidence Scorer]
-        H[Escalation Guardian]
+        H["Escalation Guardian"]:::danger
         L[Structured Audit Logger]
+        
         A --> G
         G -->|>0.7| L
         G -->|<0.7 Override| H
         H --> L
     end
+
+    %% Apply group styles
+    class IngestionLayer,CognitiveLayer,ExecutionLayer,GovernanceLayer layerBox;
 ```
 
 ## Reliability Features
