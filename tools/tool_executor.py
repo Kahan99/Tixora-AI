@@ -9,10 +9,13 @@ logger = logging.getLogger(__name__)
 async def execute_tool(tool_func, **kwargs):
     """
     Executes a tool with 3 retries and exponential backoff.
+    Failures are handled gracefully and logged at DEBUG level to avoid stderr noise.
     """
     max_retries = 3
     base_delay = 0.5
     attempts = []
+    # Check if verbose logging is enabled
+    verbose_mode = os.getenv("AGENT_VERBOSE", "false").lower() == "true"
 
     for attempt in range(1, max_retries + 1):
         start_time = time.time()
@@ -50,14 +53,19 @@ async def execute_tool(tool_func, **kwargs):
             return result, attempts
 
         except (asyncio.TimeoutError, ValueError, Exception) as e:
+            error_msg = str(e)
             if attempt < max_retries:
-                logger.debug(f"Attempt {attempt} failed for {tool_func.__name__}: {str(e)}")
+                logger.debug(f"Attempt {attempt} failed for {tool_func.__name__}: {error_msg}")
             else:
-                logger.warning(f"Tool {tool_func.__name__} failed after {max_retries} attempts: {str(e)}")
+                # Log final failures at DEBUG level in production to avoid stderr noise
+                # Tool failures are expected and handled by the agent - they're not errors
+                log_level = logging.WARNING if verbose_mode else logging.DEBUG
+                logger.log(log_level, f"Tool {tool_func.__name__} failed after {max_retries} attempts: {error_msg}")
+            
             log_entry = {
                 "attempt": attempt,
                 "status": "failed",
-                "error": str(e),
+                "error": error_msg,
                 "duration": time.time() - start_time
             }
             attempts.append(log_entry)
@@ -66,7 +74,7 @@ async def execute_tool(tool_func, **kwargs):
                 delay = base_delay * (2 ** (attempt - 1))
                 await asyncio.sleep(delay)
             else:
-                # All retries failed
+                # All retries failed - agent will handle escalation/recovery
                 return None, attempts
 
 def log_to_dlq(ticket_id, reason, history):

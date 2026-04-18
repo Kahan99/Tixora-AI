@@ -2,6 +2,11 @@ import json
 import os
 import sys
 
+try:
+    from tools.decision_utils import is_escalated_decision
+except ModuleNotFoundError:
+    from decision_utils import is_escalated_decision
+
 
 REQUIRED_TOP_LEVEL_FIELDS = {
     "ticket_id",
@@ -71,7 +76,7 @@ def main():
         sys.exit(1)
 
     findings = _check(data)
-    escalated = sum(1 for t in data if "escalat" in str(t.get("decision", "")).lower())
+    escalated = sum(1 for t in data if is_escalated_decision(t.get("decision", "")))
     successful = sum(1 for t in data if t.get("status") == "success")
 
     print(f"tickets={len(data)} success={successful} escalated={escalated}")

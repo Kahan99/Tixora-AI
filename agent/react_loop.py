@@ -54,7 +54,8 @@ async def run_react_loop(ticket: dict, classification: dict):
     body = ticket.get("body", "")
     ticket_text = f"{subject} {body}"
 
-    async def _call_tool(action: str, params: dict, thought: str):
+    async def _call_tool(action: str, params: dict, thought: str, reasoning: str = None):
+        """Call a tool with optional explicit reasoning justification."""
         nonlocal step, tool_calls_count
         step += 1
         result, attempts = await execute_tool(TOOL_MAP[action], **params)
@@ -67,17 +68,21 @@ async def run_react_loop(ticket: dict, classification: dict):
             status = "success"
             tool_calls_count += 1
 
-        history.append(
-            {
-                "step": step,
-                "thought": thought,
-                "action": action,
-                "params": params,
-                "observation": observation,
-                "status": status,
-                "attempts": attempts,
-            }
-        )
+        history_entry = {
+            "step": step,
+            "thought": thought,
+            "action": action,
+            "params": params,
+            "observation": observation,
+            "status": status,
+            "attempts": attempts,
+        }
+        
+        # Add explicit reasoning if provided (for explainability)
+        if reasoning:
+            history_entry["reasoning"] = reasoning
+        
+        history.append(history_entry)
         return result
 
     try:
@@ -85,6 +90,7 @@ async def run_react_loop(ticket: dict, classification: dict):
             "get_customer",
             {"email": ticket.get("customer_email", "")},
             "Need customer profile for entitlement and priority checks.",
+            reasoning="Verify customer tier and account status for policy eligibility gates"
         )
 
         category = classification.get("category", "other")
@@ -102,18 +108,21 @@ async def run_react_loop(ticket: dict, classification: dict):
                     "get_order",
                     {"order_id": order_id},
                     "Need order details before evaluating refund action.",
+                    reasoning="Order amount and status required to validate refund amount and eligibility"
                 )
             else:
                 await _call_tool(
                     "search_knowledge_base",
                     {"query": "refund policy"},
                     "Order id missing, retrieving policy guidance first.",
+                    reasoning="Without order ID, consult policy to guide customer on next steps"
                 )
 
             eligibility = await _call_tool(
                 "check_refund_eligibility",
                 {"order_id": order_id or "UNKNOWN"},
                 "Verify whether this order qualifies for a refund.",
+                reasoning="Eligibility check is a compliance gate - must satisfy policy before issuing refund"
             )
 
             if isinstance(eligibility, dict) and eligibility.get("eligible") and order_id:
@@ -124,11 +133,13 @@ async def run_react_loop(ticket: dict, classification: dict):
                     "issue_refund",
                     {"order_id": order_id, "amount": amount},
                     "Eligibility is positive; execute refund transaction.",
+                    reasoning="Only execute financial action after passing eligibility gate"
                 )
                 await _call_tool(
                     "send_reply",
                     {"ticket_id": ticket_id, "message": f"Refund approved for {order_id}."},
                     "Notify customer after performing financial action.",
+                    reasoning="Customer acknowledgment required after successful financial transaction"
                 )
                 decision = f"refund_issued:{order_id}"
             else:
@@ -137,6 +148,7 @@ async def run_react_loop(ticket: dict, classification: dict):
                     "escalate",
                     {"ticket_id": ticket_id, "summary": summary, "priority": "high" if urgency == "high" else "medium"},
                     "Cannot safely issue refund; escalate with structured context.",
+                    reasoning="Ineligible or insufficient data: human review required for refund decision"
                 )
                 await _call_tool(
                     "send_reply",
@@ -152,16 +164,19 @@ async def run_react_loop(ticket: dict, classification: dict):
                     "get_order",
                     {"order_id": order_id},
                     "Fetch latest shipment status from order records.",
+                    reasoning="Current order status needed to answer customer inquiry accurately"
                 )
             await _call_tool(
                 "search_knowledge_base",
                 {"query": "shipping delays"},
                 "Gather policy context for transit delay communication.",
+                reasoning="Provide expected timeline context to set customer expectations"
             )
             await _call_tool(
                 "send_reply",
                 {"ticket_id": ticket_id, "message": f"We checked your order {order_id or ''} and shared the latest status update."},
                 "Send concrete status response after evidence collection.",
+                reasoning="Deliver status update to customer with policy context"
             )
             decision = f"order_status_updated:{order_id or 'unknown'}"
 
@@ -171,16 +186,19 @@ async def run_react_loop(ticket: dict, classification: dict):
                     "get_product",
                     {"product_id": product_id},
                     "Need product metadata before answering technical question.",
+                    reasoning="Product specifications and metadata required for accurate response"
                 )
             await _call_tool(
                 "search_knowledge_base",
                 {"query": "warranty"},
                 "Confirm official warranty policy wording.",
+                reasoning="Use authoritative policy source, not memory, to ensure accuracy"
             )
             await _call_tool(
                 "send_reply",
                 {"ticket_id": ticket_id, "message": f"Product {product_id or ''} includes standard warranty coverage per policy."},
                 "Provide accurate policy-backed customer reply.",
+                reasoning="Deliver policy-backed product information to resolve inquiry"
             )
             decision = f"product_info_resolved:{product_id or 'unknown'}"
 
@@ -189,17 +207,20 @@ async def run_react_loop(ticket: dict, classification: dict):
                 "search_knowledge_base",
                 {"query": subject[:80] or "support issue"},
                 "Gather reference context before human handoff.",
+                reasoning="Collect relevant policy/context before escalating complaint"
             )
             summary = _build_escalation_summary(ticket, classification, history, "Complaint/other requires human decision")
             await _call_tool(
                 "escalate",
                 {"ticket_id": ticket_id, "summary": summary, "priority": "critical" if urgency == "high" else "high"},
                 "Policy requires escalation for complaints/ambiguous tickets.",
+                reasoning="Complaints and ambiguous requests require human expertise and judgment"
             )
             await _call_tool(
                 "send_reply",
                 {"ticket_id": ticket_id, "message": "We escalated your ticket to a senior specialist and shared full context."},
                 "Confirm escalation and expected follow-up.",
+                reasoning="Acknowledge to customer that escalation occurred"
             )
             escalated = True
             decision = "escalated_manual_review"
@@ -209,6 +230,7 @@ async def run_react_loop(ticket: dict, classification: dict):
                 "search_knowledge_base",
                 {"query": "support policy"},
                 "Policy safeguard: ensure minimum evidence-gathering tool depth.",
+                reasoning="Enforce minimum 3 tool calls per ticket for multi-step reasoning"
             )
 
         confidence = await get_confidence_score(ticket, history, decision)
@@ -219,6 +241,7 @@ async def run_react_loop(ticket: dict, classification: dict):
                 "escalate",
                 {"ticket_id": ticket_id, "summary": summary, "priority": "high"},
                 "Confidence guardrail triggered; escalate to avoid unsafe auto-resolution.",
+                reasoning=f"Confidence score {confidence} is below 0.7 threshold - escalate for safety"
             )
             decision = "auto_escalated_low_confidence"
 

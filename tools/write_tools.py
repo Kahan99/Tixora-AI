@@ -1,6 +1,5 @@
 from mocks.mock_data import MOCK_ORDERS
 from mocks.failure_simulator import simulate_failure
-import asyncio
 
 async def check_refund_eligibility(order_id: str):
     """Checks if an order is eligible for a refund."""
@@ -15,7 +14,15 @@ async def check_refund_eligibility(order_id: str):
     return await simulate_failure("check_refund_eligibility", {"eligible": eligible, "reason": reason})
 
 async def issue_refund(order_id: str, amount: float):
-    """Issues a refund for a specific order."""
+    """Issues a refund for a specific order. Checks eligibility before executing."""
+    # Irreversible action guard: check eligibility
+    order = MOCK_ORDERS.get(order_id)
+    if not order or order.get("status") != "delivered":
+        return await simulate_failure("issue_refund", {
+            "status": "failed", 
+            "error": "Guard failed: order not eligible for refund or does not exist."
+        })
+    
     # Mock successful refund
     return await simulate_failure("issue_refund", {"status": "success", "order_id": order_id, "refunded_amount": amount})
 

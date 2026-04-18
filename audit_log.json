@@ -1,0 +1,2739 @@
+[
+  {
+    "ticket_id": "TKT-1001",
+    "processed_at": "2026-04-18T09:47:35.745235Z",
+    "classification": {
+      "category": "refund",
+      "urgency": "high",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user1@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5001",
+          "name": "Customer 1",
+          "email": "user1@example.com",
+          "tier": "silver",
+          "phone": "+1-555-01001"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "Network Timeout on get_customer after 1.0s",
+            "duration": 1.2113761901855469
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "Network Timeout on get_customer after 1.0s",
+            "duration": 1.2828903198242188
+          },
+          {
+            "attempt": 3,
+            "status": "success",
+            "duration": 0.7447364330291748
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Need order details before evaluating refund action.",
+        "action": "get_order",
+        "params": {
+          "order_id": "ORD-2001"
+        },
+        "observation": {
+          "error": "Tool get_order failed after retries"
+        },
+        "status": "fatal_failure",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 1.1642131805419922
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "Network Timeout on get_order after 1.0s",
+            "duration": 1.5416295528411865
+          },
+          {
+            "attempt": 3,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for get_order unavailable",
+            "duration": 0.466447114944458
+          }
+        ],
+        "reasoning": "Order amount and status required to validate refund amount and eligibility"
+      },
+      {
+        "step": 3,
+        "thought": "Verify whether this order qualifies for a refund.",
+        "action": "check_refund_eligibility",
+        "params": {
+          "order_id": "ORD-2001"
+        },
+        "observation": {
+          "eligible": false,
+          "reason": "Order not yet delivered"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.9941515922546387
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "Network Timeout on check_refund_eligibility after 1.0s",
+            "duration": 2.3825557231903076
+          },
+          {
+            "attempt": 3,
+            "status": "success",
+            "duration": 0.5604639053344727
+          }
+        ],
+        "reasoning": "Eligibility check is a compliance gate - must satisfy policy before issuing refund"
+      },
+      {
+        "step": 4,
+        "thought": "Cannot safely issue refund; escalate with structured context.",
+        "action": "escalate",
+        "params": {
+          "ticket_id": "TKT-1001",
+          "summary": "{\"ticket_id\": \"TKT-1001\", \"category\": \"refund\", \"urgency\": \"high\", \"reason\": \"Refund ineligible or insufficient data\", \"recent_observations\": [\"{'customer_id': 'CUST-5001', 'name': 'Customer 1', 'email': 'user1@example.com', 'tier': 'silver', 'phone': '+1-555-01001'}\", \"{'error': 'Tool get_order failed after retries'}\", \"{'eligible': False, 'reason': 'Order not yet delivered'}\"], \"customer_email\": \"user1@example.com\"}",
+          "priority": "high"
+        },
+        "observation": {
+          "status": "escalated",
+          "ticket_id": "TKT-1001",
+          "priority": "high"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.0934560298919678
+          }
+        ],
+        "reasoning": "Ineligible or insufficient data: human review required for refund decision"
+      },
+      {
+        "step": 5,
+        "thought": "Acknowledge escalation to keep customer informed.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1001",
+          "message": "Your case was escalated to a specialist for review."
+        },
+        "observation": {
+          "status": "sent",
+          "ticket_id": "TKT-1001"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.37056541442871094
+          }
+        ]
+      }
+    ],
+    "decision": "escalated_refund_case",
+    "confidence": 0.9,
+    "duration": 16.44009828567505,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1002",
+    "processed_at": "2026-04-18T09:47:22.870931Z",
+    "classification": {
+      "category": "product_info",
+      "urgency": "low",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user2@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5002",
+          "name": "Customer 2",
+          "email": "user2@example.com",
+          "tier": "silver",
+          "phone": "+1-555-01002"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.486309289932251
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Need product metadata before answering technical question.",
+        "action": "get_product",
+        "params": {
+          "product_id": "PROD-3002"
+        },
+        "observation": {
+          "product_id": "PROD-3002",
+          "description": "High-quality gizmo tool for general use.",
+          "stock_status": "in_stock"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.49529314041137695
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 0.3883829116821289
+          }
+        ],
+        "reasoning": "Product specifications and metadata required for accurate response"
+      },
+      {
+        "step": 3,
+        "thought": "Confirm official warranty policy wording.",
+        "action": "search_knowledge_base",
+        "params": {
+          "query": "warranty"
+        },
+        "observation": [
+          {
+            "id": "KB-003",
+            "title": "Warranty Information",
+            "content": "All mechanical products come with a 1-year limited warranty against manufacturing defects."
+          }
+        ],
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.3544924259185791
+          }
+        ],
+        "reasoning": "Use authoritative policy source, not memory, to ensure accuracy"
+      },
+      {
+        "step": 4,
+        "thought": "Provide accurate policy-backed customer reply.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1002",
+          "message": "Product PROD-3002 includes standard warranty coverage per policy."
+        },
+        "observation": {
+          "status": "sent",
+          "ticket_id": "TKT-1002"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.334794521331787
+          }
+        ],
+        "reasoning": "Deliver policy-backed product information to resolve inquiry"
+      }
+    ],
+    "decision": "product_info_resolved:PROD-3002",
+    "confidence": 0.95,
+    "duration": 3.5657944679260254,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1003",
+    "processed_at": "2026-04-18T09:47:25.486893Z",
+    "classification": {
+      "category": "refund",
+      "urgency": "medium",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user3@example.com"
+        },
+        "observation": {
+          "name": "Customer 3",
+          "email": "user3@example.com",
+          "phone": "+1-555-01003"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.2864255905151367
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 1.2368559837341309
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Need order details before evaluating refund action.",
+        "action": "get_order",
+        "params": {
+          "order_id": "ORD-2003"
+        },
+        "observation": {
+          "order_id": "ORD-2003",
+          "status": "shipped",
+          "items": [
+            {
+              "product_id": "PROD-3003",
+              "quantity": 1,
+              "price": 49.99
+            }
+          ]
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.4807615280151367
+          }
+        ],
+        "reasoning": "Order amount and status required to validate refund amount and eligibility"
+      },
+      {
+        "step": 3,
+        "thought": "Verify whether this order qualifies for a refund.",
+        "action": "check_refund_eligibility",
+        "params": {
+          "order_id": "ORD-2003"
+        },
+        "observation": {
+          "eligible": false,
+          "reason": "Order not yet delivered"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.2556400299072266
+          }
+        ],
+        "reasoning": "Eligibility check is a compliance gate - must satisfy policy before issuing refund"
+      },
+      {
+        "step": 4,
+        "thought": "Cannot safely issue refund; escalate with structured context.",
+        "action": "escalate",
+        "params": {
+          "ticket_id": "TKT-1003",
+          "summary": "{\"ticket_id\": \"TKT-1003\", \"category\": \"refund\", \"urgency\": \"medium\", \"reason\": \"Refund ineligible or insufficient data\", \"recent_observations\": [\"{'name': 'Customer 3', 'email': 'user3@example.com', 'phone': '+1-555-01003'}\", \"{'order_id': 'ORD-2003', 'status': 'shipped', 'items': [{'product_id': 'PROD-3003', 'quantity': 1, 'price': 49.99}]}\", \"{'eligible': False, 'reason': 'Order not yet delivered'}\"], \"customer_email\": \"user3@example.com\"}",
+          "priority": "medium"
+        },
+        "observation": {
+          "status": "escalated",
+          "ticket_id": "TKT-1003"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.9891393184661865
+          }
+        ],
+        "reasoning": "Ineligible or insufficient data: human review required for refund decision"
+      },
+      {
+        "step": 5,
+        "thought": "Acknowledge escalation to keep customer informed.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1003",
+          "message": "Your case was escalated to a specialist for review."
+        },
+        "observation": {
+          "status": "sent",
+          "ticket_id": "TKT-1003"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.4106037616729736
+          }
+        ]
+      }
+    ],
+    "decision": "escalated_refund_case",
+    "confidence": 0.9,
+    "duration": 6.181757211685181,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1004",
+    "processed_at": "2026-04-18T09:47:24.789834Z",
+    "classification": {
+      "category": "refund",
+      "urgency": "high",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user4@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5004",
+          "name": "Customer 4",
+          "email": "user4@example.com",
+          "tier": "silver",
+          "phone": "+1-555-01004"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.6234276294708252
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Need order details before evaluating refund action.",
+        "action": "get_order",
+        "params": {
+          "order_id": "ORD-2004"
+        },
+        "observation": {
+          "order_id": "ORD-2004",
+          "customer_id": "CUST-5004",
+          "status": "delivered",
+          "items": [
+            {
+              "product_id": "PROD-3004",
+              "quantity": 1,
+              "price": 49.99
+            }
+          ],
+          "total_amount": 49.99,
+          "delivery_date": "2026-04-10"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.3298072814941406
+          }
+        ],
+        "reasoning": "Order amount and status required to validate refund amount and eligibility"
+      },
+      {
+        "step": 3,
+        "thought": "Verify whether this order qualifies for a refund.",
+        "action": "check_refund_eligibility",
+        "params": {
+          "order_id": "ORD-2004"
+        },
+        "observation": {
+          "eligible": true,
+          "reason": "Order delivered and within timeframe"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 1.100348711013794
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 1.0813241004943848
+          }
+        ],
+        "reasoning": "Eligibility check is a compliance gate - must satisfy policy before issuing refund"
+      },
+      {
+        "step": 4,
+        "thought": "Eligibility is positive; execute refund transaction.",
+        "action": "issue_refund",
+        "params": {
+          "order_id": "ORD-2004",
+          "amount": 49.99
+        },
+        "observation": {
+          "status": "success",
+          "order_id": "ORD-2004",
+          "refunded_amount": 49.99
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.12353062629699707
+          }
+        ],
+        "reasoning": "Only execute financial action after passing eligibility gate"
+      },
+      {
+        "step": 5,
+        "thought": "Notify customer after performing financial action.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1004",
+          "message": "Refund approved for ORD-2004."
+        },
+        "observation": {
+          "status": "sent"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.7135443687438965
+          }
+        ],
+        "reasoning": "Customer acknowledgment required after successful financial transaction"
+      }
+    ],
+    "decision": "refund_issued:ORD-2004",
+    "confidence": 0.98,
+    "duration": 5.4846978187561035,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1005",
+    "processed_at": "2026-04-18T09:47:26.313320Z",
+    "classification": {
+      "category": "product_info",
+      "urgency": "high",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user5@example.com"
+        },
+        "observation": {
+          "email": "user5@example.com",
+          "tier": "silver",
+          "phone": "+1-555-01005"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 1.2113761901855469
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 1.0828747749328613
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Need product metadata before answering technical question.",
+        "action": "get_product",
+        "params": {
+          "product_id": "PROD-3005"
+        },
+        "observation": {
+          "product_id": "PROD-3005",
+          "name": "Gizmo Tool 5",
+          "description": "High-quality gizmo tool for general use.",
+          "warranty_period": "12 months",
+          "stock_status": "in_stock"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.6376893520355225
+          }
+        ],
+        "reasoning": "Product specifications and metadata required for accurate response"
+      },
+      {
+        "step": 3,
+        "thought": "Confirm official warranty policy wording.",
+        "action": "search_knowledge_base",
+        "params": {
+          "query": "warranty"
+        },
+        "observation": [
+          {
+            "id": "KB-003",
+            "title": "Warranty Information",
+            "content": "All mechanical products come with a 1-year limited warranty against manufacturing defects."
+          }
+        ],
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.5015695095062256
+          }
+        ],
+        "reasoning": "Use authoritative policy source, not memory, to ensure accuracy"
+      },
+      {
+        "step": 4,
+        "thought": "Provide accurate policy-backed customer reply.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1005",
+          "message": "Product PROD-3005 includes standard warranty coverage per policy."
+        },
+        "observation": {
+          "status": "sent",
+          "ticket_id": "TKT-1005"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.3378438949584961
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 1.2112882137298584
+          }
+        ],
+        "reasoning": "Deliver policy-backed product information to resolve inquiry"
+      }
+    ],
+    "decision": "product_info_resolved:PROD-3005",
+    "confidence": 0.95,
+    "duration": 7.008183479309082,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1006",
+    "processed_at": "2026-04-18T09:47:37.412214Z",
+    "classification": {
+      "category": "refund",
+      "urgency": "high",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user6@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5006",
+          "name": "Customer 6",
+          "email": "user6@example.com",
+          "tier": "gold",
+          "phone": "+1-555-01006"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.46062254905700684
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Need order details before evaluating refund action.",
+        "action": "get_order",
+        "params": {
+          "order_id": "ORD-2006"
+        },
+        "observation": {
+          "order_id": "ORD-2006",
+          "customer_id": "CUST-5006",
+          "status": "delivered",
+          "items": [
+            {
+              "product_id": "PROD-3006",
+              "quantity": 1,
+              "price": 49.99
+            }
+          ],
+          "total_amount": 49.99,
+          "delivery_date": "2026-04-10"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "Network Timeout on get_order after 1.0s",
+            "duration": 2.4522876739501953
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.2628438472747803
+          },
+          {
+            "attempt": 3,
+            "status": "success",
+            "duration": 0.2621724605560303
+          }
+        ],
+        "reasoning": "Order amount and status required to validate refund amount and eligibility"
+      },
+      {
+        "step": 3,
+        "thought": "Verify whether this order qualifies for a refund.",
+        "action": "check_refund_eligibility",
+        "params": {
+          "order_id": "ORD-2006"
+        },
+        "observation": {
+          "error": "Tool check_refund_eligibility failed after retries"
+        },
+        "status": "fatal_failure",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for check_refund_eligibility unavailable",
+            "duration": 1.351783275604248
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 1.036679983139038
+          },
+          {
+            "attempt": 3,
+            "status": "failed",
+            "error": "Network Timeout on check_refund_eligibility after 1.0s",
+            "duration": 1.5781309604644775
+          }
+        ],
+        "reasoning": "Eligibility check is a compliance gate - must satisfy policy before issuing refund"
+      },
+      {
+        "step": 4,
+        "thought": "Cannot safely issue refund; escalate with structured context.",
+        "action": "escalate",
+        "params": {
+          "ticket_id": "TKT-1006",
+          "summary": "{\"ticket_id\": \"TKT-1006\", \"category\": \"refund\", \"urgency\": \"high\", \"reason\": \"Refund ineligible or insufficient data\", \"recent_observations\": [\"{'customer_id': 'CUST-5006', 'name': 'Customer 6', 'email': 'user6@example.com', 'tier': 'gold', 'phone': '+1-555-01006'}\", \"{'order_id': 'ORD-2006', 'customer_id': 'CUST-5006', 'status': 'delivered', 'items': [{'product_id': 'PROD-3006', 'quantity': 1, 'price': 49.99}], 'total_amount': 49.99, 'delivery_date': '2026-04-10'}\", \"{'error': 'Tool check_refund_eligibility failed after retries'}\"], \"customer_email\": \"user6@example.com\"}",
+          "priority": "high"
+        },
+        "observation": {
+          "status": "escalated",
+          "ticket_id": "TKT-1006",
+          "priority": "high"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.8297863006591797
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 0.8697309494018555
+          }
+        ],
+        "reasoning": "Ineligible or insufficient data: human review required for refund decision"
+      },
+      {
+        "step": 5,
+        "thought": "Acknowledge escalation to keep customer informed.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1006",
+          "message": "Your case was escalated to a specialist for review."
+        },
+        "observation": {
+          "ticket_id": "TKT-1006"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.37364840507507324
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 0.9677920341491699
+          }
+        ]
+      }
+    ],
+    "decision": "escalated_refund_case",
+    "confidence": 0.9,
+    "duration": 14.541283130645752,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1007",
+    "processed_at": "2026-04-18T09:47:31.463166Z",
+    "classification": {
+      "category": "order_status",
+      "urgency": "low",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user7@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5007",
+          "name": "Customer 7",
+          "email": "user7@example.com",
+          "tier": "silver",
+          "phone": "+1-555-01007"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.2639353275299072
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Fetch latest shipment status from order records.",
+        "action": "get_order",
+        "params": {
+          "order_id": "ORD-2007"
+        },
+        "observation": {
+          "order_id": "ORD-2007",
+          "customer_id": "CUST-5007",
+          "status": "shipped",
+          "items": [
+            {
+              "product_id": "PROD-3007",
+              "quantity": 1,
+              "price": 49.99
+            }
+          ],
+          "total_amount": 49.99,
+          "delivery_date": "2026-04-10"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "Network Timeout on get_order after 1.0s",
+            "duration": 2.240238666534424
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 0.573958158493042
+          }
+        ],
+        "reasoning": "Current order status needed to answer customer inquiry accurately"
+      },
+      {
+        "step": 3,
+        "thought": "Gather policy context for transit delay communication.",
+        "action": "search_knowledge_base",
+        "params": {
+          "query": "shipping delays"
+        },
+        "observation": [
+          {
+            "id": "KB-002",
+            "title": "Shipping Delays",
+            "content": "Due to high demand, some orders may experience a 2-3 day delay in shipping."
+          }
+        ],
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.5127580165863037
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 0.3864572048187256
+          }
+        ],
+        "reasoning": "Provide expected timeline context to set customer expectations"
+      },
+      {
+        "step": 4,
+        "thought": "Send concrete status response after evidence collection.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1007",
+          "message": "We checked your order ORD-2007 and shared the latest status update."
+        },
+        "observation": {
+          "ticket_id": "TKT-1007"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.5719048976898193
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 0.5771811008453369
+          }
+        ],
+        "reasoning": "Deliver status update to customer with policy context"
+      }
+    ],
+    "decision": "order_status_updated:ORD-2007",
+    "confidence": 0.95,
+    "duration": 6.67333197593689,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1008",
+    "processed_at": "2026-04-18T09:47:37.554564Z",
+    "classification": {
+      "category": "refund",
+      "urgency": "low",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user8@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5008",
+          "name": "Customer 8",
+          "email": "user8@example.com",
+          "tier": "silver",
+          "phone": "+1-555-01008"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for get_customer unavailable",
+            "duration": 1.414168357849121
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 1.291435956954956
+          },
+          {
+            "attempt": 3,
+            "status": "success",
+            "duration": 1.0044641494750977
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Need order details before evaluating refund action.",
+        "action": "get_order",
+        "params": {
+          "order_id": "ORD-2008"
+        },
+        "observation": {
+          "order_id": "ORD-2008",
+          "customer_id": "CUST-5008",
+          "status": "delivered",
+          "items": [
+            {
+              "product_id": "PROD-3008",
+              "quantity": 1,
+              "price": 49.99
+            }
+          ],
+          "total_amount": 49.99,
+          "delivery_date": "2026-04-10"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.7762553691864014
+          }
+        ],
+        "reasoning": "Order amount and status required to validate refund amount and eligibility"
+      },
+      {
+        "step": 3,
+        "thought": "Verify whether this order qualifies for a refund.",
+        "action": "check_refund_eligibility",
+        "params": {
+          "order_id": "ORD-2008"
+        },
+        "observation": {
+          "eligible": true,
+          "reason": "Order delivered and within timeframe"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.9293224811553955
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.5675652027130127
+          },
+          {
+            "attempt": 3,
+            "status": "success",
+            "duration": 1.522594690322876
+          }
+        ],
+        "reasoning": "Eligibility check is a compliance gate - must satisfy policy before issuing refund"
+      },
+      {
+        "step": 4,
+        "thought": "Eligibility is positive; execute refund transaction.",
+        "action": "issue_refund",
+        "params": {
+          "order_id": "ORD-2008",
+          "amount": 49.99
+        },
+        "observation": {
+          "status": "success",
+          "order_id": "ORD-2008",
+          "refunded_amount": 49.99
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.824103593826294
+          }
+        ],
+        "reasoning": "Only execute financial action after passing eligibility gate"
+      },
+      {
+        "step": 5,
+        "thought": "Notify customer after performing financial action.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1008",
+          "message": "Refund approved for ORD-2008."
+        },
+        "observation": {
+          "status": "sent",
+          "ticket_id": "TKT-1008"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.675940990447998
+          }
+        ],
+        "reasoning": "Customer acknowledgment required after successful financial transaction"
+      }
+    ],
+    "decision": "refund_issued:ORD-2008",
+    "confidence": 0.98,
+    "duration": 12.067670106887817,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1009",
+    "processed_at": "2026-04-18T09:47:34.812685Z",
+    "classification": {
+      "category": "refund",
+      "urgency": "medium",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user9@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5009",
+          "name": "Customer 9",
+          "email": "user9@example.com",
+          "tier": "gold",
+          "phone": "+1-555-01009"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.5893170833587646
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Need order details before evaluating refund action.",
+        "action": "get_order",
+        "params": {
+          "order_id": "ORD-2009"
+        },
+        "observation": {
+          "order_id": "ORD-2009",
+          "customer_id": "CUST-5009",
+          "status": "shipped",
+          "items": [
+            {
+              "product_id": "PROD-3009",
+              "quantity": 1,
+              "price": 49.99
+            }
+          ],
+          "total_amount": 49.99,
+          "delivery_date": "2026-04-10"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "Network Timeout on get_order after 1.0s",
+            "duration": 1.4887828826904297
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 0.5137679576873779
+          }
+        ],
+        "reasoning": "Order amount and status required to validate refund amount and eligibility"
+      },
+      {
+        "step": 3,
+        "thought": "Verify whether this order qualifies for a refund.",
+        "action": "check_refund_eligibility",
+        "params": {
+          "order_id": "ORD-2009"
+        },
+        "observation": {
+          "eligible": false,
+          "reason": "Order not yet delivered"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "Network Timeout on check_refund_eligibility after 1.0s",
+            "duration": 2.5226290225982666
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 0.7742938995361328
+          }
+        ],
+        "reasoning": "Eligibility check is a compliance gate - must satisfy policy before issuing refund"
+      },
+      {
+        "step": 4,
+        "thought": "Cannot safely issue refund; escalate with structured context.",
+        "action": "escalate",
+        "params": {
+          "ticket_id": "TKT-1009",
+          "summary": "{\"ticket_id\": \"TKT-1009\", \"category\": \"refund\", \"urgency\": \"medium\", \"reason\": \"Refund ineligible or insufficient data\", \"recent_observations\": [\"{'customer_id': 'CUST-5009', 'name': 'Customer 9', 'email': 'user9@example.com', 'tier': 'gold', 'phone': '+1-555-01009'}\", \"{'order_id': 'ORD-2009', 'customer_id': 'CUST-5009', 'status': 'shipped', 'items': [{'product_id': 'PROD-3009', 'quantity': 1, 'price': 49.99}], 'total_amount': 49.99, 'delivery_date': '2026-04-10'}\", \"{'eligible': False, 'reason': 'Order not yet delivered'}\"], \"customer_email\": \"user9@example.com\"}",
+          "priority": "medium"
+        },
+        "observation": {
+          "ticket_id": "TKT-1009",
+          "priority": "medium"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.2624344825744629
+          }
+        ],
+        "reasoning": "Ineligible or insufficient data: human review required for refund decision"
+      },
+      {
+        "step": 5,
+        "thought": "Acknowledge escalation to keep customer informed.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1009",
+          "message": "Your case was escalated to a specialist for review."
+        },
+        "observation": {
+          "status": "sent",
+          "ticket_id": "TKT-1009"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.3242335319519043
+          }
+        ]
+      }
+    ],
+    "decision": "escalated_refund_case",
+    "confidence": 0.9,
+    "duration": 8.499364852905273,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1010",
+    "processed_at": "2026-04-18T09:47:42.176754Z",
+    "classification": {
+      "category": "complaint",
+      "urgency": "high",
+      "resolvability": "escalate",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user10@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5010",
+          "name": "Customer 10",
+          "phone": "+1-555-01010"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for get_customer unavailable",
+            "duration": 0.4012491703033447
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for get_customer unavailable",
+            "duration": 1.3907032012939453
+          },
+          {
+            "attempt": 3,
+            "status": "success",
+            "duration": 0.6516873836517334
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Gather reference context before human handoff.",
+        "action": "search_knowledge_base",
+        "params": {
+          "query": "Poor service experience"
+        },
+        "observation": {
+          "error": "No matching articles"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.446570873260498
+          }
+        ],
+        "reasoning": "Collect relevant policy/context before escalating complaint"
+      },
+      {
+        "step": 3,
+        "thought": "Policy requires escalation for complaints/ambiguous tickets.",
+        "action": "escalate",
+        "params": {
+          "ticket_id": "TKT-1010",
+          "summary": "{\"ticket_id\": \"TKT-1010\", \"category\": \"complaint\", \"urgency\": \"high\", \"reason\": \"Complaint/other requires human decision\", \"recent_observations\": [\"{'customer_id': 'CUST-5010', 'name': 'Customer 10', 'phone': '+1-555-01010'}\", \"{'error': 'No matching articles'}\"], \"customer_email\": \"user10@example.com\"}",
+          "priority": "critical"
+        },
+        "observation": {
+          "status": "escalated",
+          "ticket_id": "TKT-1010",
+          "priority": "critical"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.39217257499694824
+          }
+        ],
+        "reasoning": "Complaints and ambiguous requests require human expertise and judgment"
+      },
+      {
+        "step": 4,
+        "thought": "Confirm escalation and expected follow-up.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1010",
+          "message": "We escalated your ticket to a senior specialist and shared full context."
+        },
+        "observation": {
+          "status": "sent",
+          "ticket_id": "TKT-1010"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.6661341190338135
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "Network Timeout on send_reply after 1.0s",
+            "duration": 1.661970853805542
+          },
+          {
+            "attempt": 3,
+            "status": "success",
+            "duration": 1.0567796230316162
+          }
+        ],
+        "reasoning": "Acknowledge to customer that escalation occurred"
+      }
+    ],
+    "decision": "escalated_manual_review",
+    "confidence": 0.9,
+    "duration": 10.713588237762451,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1011",
+    "processed_at": "2026-04-18T09:47:45.217070Z",
+    "classification": {
+      "category": "complaint",
+      "urgency": "low",
+      "resolvability": "escalate",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user11@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5011",
+          "name": "Customer 11",
+          "email": "user11@example.com",
+          "tier": "silver",
+          "phone": "+1-555-01011"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.2418344020843506
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Gather reference context before human handoff.",
+        "action": "search_knowledge_base",
+        "params": {
+          "query": "Poor service experience"
+        },
+        "observation": {
+          "error": "No matching articles"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "Network Timeout on search_knowledge_base after 1.0s",
+            "duration": 2.0090651512145996
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for search_knowledge_base unavailable",
+            "duration": 0.2031726837158203
+          },
+          {
+            "attempt": 3,
+            "status": "success",
+            "duration": 0.7672500610351562
+          }
+        ],
+        "reasoning": "Collect relevant policy/context before escalating complaint"
+      },
+      {
+        "step": 3,
+        "thought": "Policy requires escalation for complaints/ambiguous tickets.",
+        "action": "escalate",
+        "params": {
+          "ticket_id": "TKT-1011",
+          "summary": "{\"ticket_id\": \"TKT-1011\", \"category\": \"complaint\", \"urgency\": \"low\", \"reason\": \"Complaint/other requires human decision\", \"recent_observations\": [\"{'customer_id': 'CUST-5011', 'name': 'Customer 11', 'email': 'user11@example.com', 'tier': 'silver', 'phone': '+1-555-01011'}\", \"{'error': 'No matching articles'}\"], \"customer_email\": \"user11@example.com\"}",
+          "priority": "high"
+        },
+        "observation": {
+          "status": "escalated",
+          "ticket_id": "TKT-1011",
+          "priority": "high"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.5431749820709229
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 1.4450738430023193
+          }
+        ],
+        "reasoning": "Complaints and ambiguous requests require human expertise and judgment"
+      },
+      {
+        "step": 4,
+        "thought": "Confirm escalation and expected follow-up.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1011",
+          "message": "We escalated your ticket to a senior specialist and shared full context."
+        },
+        "observation": {
+          "ticket_id": "TKT-1011"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 1.0531954765319824
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 0.5701906681060791
+          }
+        ],
+        "reasoning": "Acknowledge to customer that escalation occurred"
+      }
+    ],
+    "decision": "escalated_manual_review",
+    "confidence": 0.9,
+    "duration": 10.404385566711426,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1012",
+    "processed_at": "2026-04-18T09:47:43.669076Z",
+    "classification": {
+      "category": "complaint",
+      "urgency": "low",
+      "resolvability": "escalate",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user12@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5012",
+          "email": "user12@example.com",
+          "tier": "gold"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.8523361682891846
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Gather reference context before human handoff.",
+        "action": "search_knowledge_base",
+        "params": {
+          "query": "Poor service experience"
+        },
+        "observation": {},
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.0157217979431152
+          }
+        ],
+        "reasoning": "Collect relevant policy/context before escalating complaint"
+      },
+      {
+        "step": 3,
+        "thought": "Policy requires escalation for complaints/ambiguous tickets.",
+        "action": "escalate",
+        "params": {
+          "ticket_id": "TKT-1012",
+          "summary": "{\"ticket_id\": \"TKT-1012\", \"category\": \"complaint\", \"urgency\": \"low\", \"reason\": \"Complaint/other requires human decision\", \"recent_observations\": [\"{'customer_id': 'CUST-5012', 'email': 'user12@example.com', 'tier': 'gold'}\", \"{}\"], \"customer_email\": \"user12@example.com\"}",
+          "priority": "high"
+        },
+        "observation": {
+          "status": "escalated",
+          "ticket_id": "TKT-1012",
+          "priority": "high"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.7633359432220459
+          }
+        ],
+        "reasoning": "Complaints and ambiguous requests require human expertise and judgment"
+      },
+      {
+        "step": 4,
+        "thought": "Confirm escalation and expected follow-up.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1012",
+          "message": "We escalated your ticket to a senior specialist and shared full context."
+        },
+        "observation": {
+          "status": "sent",
+          "ticket_id": "TKT-1012"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "Network Timeout on send_reply after 1.0s",
+            "duration": 1.5488743782043457
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 1.0558950901031494
+          },
+          {
+            "attempt": 3,
+            "status": "success",
+            "duration": 1.162858247756958
+          }
+        ],
+        "reasoning": "Acknowledge to customer that escalation occurred"
+      }
+    ],
+    "decision": "escalated_manual_review",
+    "confidence": 0.9,
+    "duration": 7.92384147644043,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1013",
+    "processed_at": "2026-04-18T09:47:41.071955Z",
+    "classification": {
+      "category": "order_status",
+      "urgency": "high",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user13@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5013",
+          "name": "Customer 13",
+          "email": "user13@example.com",
+          "tier": "silver",
+          "phone": "+1-555-01013"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.8696482181549072
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 0.4736328125
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Fetch latest shipment status from order records.",
+        "action": "get_order",
+        "params": {
+          "order_id": "ORD-2013"
+        },
+        "observation": {
+          "order_id": "ORD-2013",
+          "customer_id": "CUST-5013",
+          "status": "shipped",
+          "items": [
+            {
+              "product_id": "PROD-3013",
+              "quantity": 1,
+              "price": 49.99
+            }
+          ],
+          "total_amount": 49.99,
+          "delivery_date": "2026-04-10"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.18808341026306152
+          }
+        ],
+        "reasoning": "Current order status needed to answer customer inquiry accurately"
+      },
+      {
+        "step": 3,
+        "thought": "Gather policy context for transit delay communication.",
+        "action": "search_knowledge_base",
+        "params": {
+          "query": "shipping delays"
+        },
+        "observation": [
+          {
+            "id": "KB-002",
+            "title": "Shipping Delays",
+            "content": "Due to high demand, some orders may experience a 2-3 day delay in shipping."
+          }
+        ],
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.28930163383483887
+          }
+        ],
+        "reasoning": "Provide expected timeline context to set customer expectations"
+      },
+      {
+        "step": 4,
+        "thought": "Send concrete status response after evidence collection.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1013",
+          "message": "We checked your order ORD-2013 and shared the latest status update."
+        },
+        "observation": {
+          "status": "sent"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.343768835067749
+          }
+        ],
+        "reasoning": "Deliver status update to customer with policy context"
+      }
+    ],
+    "decision": "order_status_updated:ORD-2013",
+    "confidence": 0.95,
+    "duration": 3.6597414016723633,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1014",
+    "processed_at": "2026-04-18T09:47:44.862371Z",
+    "classification": {
+      "category": "complaint",
+      "urgency": "high",
+      "resolvability": "escalate",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user14@example.com"
+        },
+        "observation": {
+          "error": "Tool get_customer failed after retries"
+        },
+        "status": "fatal_failure",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "Network Timeout on get_customer after 1.0s",
+            "duration": 1.2219464778900146
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for get_customer unavailable",
+            "duration": 0.3223686218261719
+          },
+          {
+            "attempt": 3,
+            "status": "failed",
+            "error": "Network Timeout on get_customer after 1.0s",
+            "duration": 1.3832437992095947
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Gather reference context before human handoff.",
+        "action": "search_knowledge_base",
+        "params": {
+          "query": "Poor service experience"
+        },
+        "observation": {
+          "error": "No matching articles"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.6642544269561768
+          }
+        ],
+        "reasoning": "Collect relevant policy/context before escalating complaint"
+      },
+      {
+        "step": 3,
+        "thought": "Policy requires escalation for complaints/ambiguous tickets.",
+        "action": "escalate",
+        "params": {
+          "ticket_id": "TKT-1014",
+          "summary": "{\"ticket_id\": \"TKT-1014\", \"category\": \"complaint\", \"urgency\": \"high\", \"reason\": \"Complaint/other requires human decision\", \"recent_observations\": [\"{'error': 'Tool get_customer failed after retries'}\", \"{'error': 'No matching articles'}\"], \"customer_email\": \"user14@example.com\"}",
+          "priority": "critical"
+        },
+        "observation": {
+          "status": "escalated",
+          "ticket_id": "TKT-1014",
+          "priority": "critical"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.9631502628326416
+          }
+        ],
+        "reasoning": "Complaints and ambiguous requests require human expertise and judgment"
+      },
+      {
+        "step": 4,
+        "thought": "Confirm escalation and expected follow-up.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1014",
+          "message": "We escalated your ticket to a senior specialist and shared full context."
+        },
+        "observation": {
+          "status": "sent",
+          "ticket_id": "TKT-1014"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.1932945251464844
+          }
+        ],
+        "reasoning": "Acknowledge to customer that escalation occurred"
+      }
+    ],
+    "decision": "escalated_manual_review",
+    "confidence": 0.85,
+    "duration": 7.307806968688965,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1015",
+    "processed_at": "2026-04-18T09:47:52.394685Z",
+    "classification": {
+      "category": "refund",
+      "urgency": "medium",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user15@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5015",
+          "name": "Customer 15",
+          "email": "user15@example.com",
+          "tier": "gold",
+          "phone": "+1-555-01015"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 1.1676440238952637
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for get_customer unavailable",
+            "duration": 1.3798325061798096
+          },
+          {
+            "attempt": 3,
+            "status": "success",
+            "duration": 0.900639533996582
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Need order details before evaluating refund action.",
+        "action": "get_order",
+        "params": {
+          "order_id": "ORD-2015"
+        },
+        "observation": {
+          "order_id": "ORD-2015",
+          "customer_id": "CUST-5015",
+          "status": "shipped",
+          "items": [
+            {
+              "product_id": "PROD-3015",
+              "quantity": 1,
+              "price": 49.99
+            }
+          ],
+          "total_amount": 49.99,
+          "delivery_date": "2026-04-10"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.5553655624389648
+          }
+        ],
+        "reasoning": "Order amount and status required to validate refund amount and eligibility"
+      },
+      {
+        "step": 3,
+        "thought": "Verify whether this order qualifies for a refund.",
+        "action": "check_refund_eligibility",
+        "params": {
+          "order_id": "ORD-2015"
+        },
+        "observation": {
+          "eligible": false,
+          "reason": "Order not yet delivered"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.6686794757843018
+          }
+        ],
+        "reasoning": "Eligibility check is a compliance gate - must satisfy policy before issuing refund"
+      },
+      {
+        "step": 4,
+        "thought": "Cannot safely issue refund; escalate with structured context.",
+        "action": "escalate",
+        "params": {
+          "ticket_id": "TKT-1015",
+          "summary": "{\"ticket_id\": \"TKT-1015\", \"category\": \"refund\", \"urgency\": \"medium\", \"reason\": \"Refund ineligible or insufficient data\", \"recent_observations\": [\"{'customer_id': 'CUST-5015', 'name': 'Customer 15', 'email': 'user15@example.com', 'tier': 'gold', 'phone': '+1-555-01015'}\", \"{'order_id': 'ORD-2015', 'customer_id': 'CUST-5015', 'status': 'shipped', 'items': [{'product_id': 'PROD-3015', 'quantity': 1, 'price': 49.99}], 'total_amount': 49.99, 'delivery_date': '2026-04-10'}\", \"{'eligible': False, 'reason': 'Order not yet delivered'}\"], \"customer_email\": \"user15@example.com\"}",
+          "priority": "medium"
+        },
+        "observation": {
+          "status": "escalated",
+          "ticket_id": "TKT-1015"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.3101651668548584
+          }
+        ],
+        "reasoning": "Ineligible or insufficient data: human review required for refund decision"
+      },
+      {
+        "step": 5,
+        "thought": "Acknowledge escalation to keep customer informed.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1015",
+          "message": "Your case was escalated to a specialist for review."
+        },
+        "observation": {
+          "status": "sent",
+          "ticket_id": "TKT-1015"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "Network Timeout on send_reply after 1.0s",
+            "duration": 1.2627902030944824
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.9045286178588867
+          },
+          {
+            "attempt": 3,
+            "status": "success",
+            "duration": 0.10879302024841309
+          }
+        ]
+      }
+    ],
+    "decision": "escalated_refund_case",
+    "confidence": 0.9,
+    "duration": 11.322729587554932,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1016",
+    "processed_at": "2026-04-18T09:47:45.266299Z",
+    "classification": {
+      "category": "order_status",
+      "urgency": "medium",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user16@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5016",
+          "name": "Customer 16",
+          "email": "user16@example.com",
+          "tier": "silver",
+          "phone": "+1-555-01016"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.1648759841918945
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Fetch latest shipment status from order records.",
+        "action": "get_order",
+        "params": {
+          "order_id": "ORD-2016"
+        },
+        "observation": {
+          "order_id": "ORD-2016",
+          "customer_id": "CUST-5016",
+          "status": "delivered",
+          "items": [
+            {
+              "product_id": "PROD-3016",
+              "quantity": 1,
+              "price": 49.99
+            }
+          ],
+          "total_amount": 49.99,
+          "delivery_date": "2026-04-10"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.4803783893585205
+          }
+        ],
+        "reasoning": "Current order status needed to answer customer inquiry accurately"
+      },
+      {
+        "step": 3,
+        "thought": "Gather policy context for transit delay communication.",
+        "action": "search_knowledge_base",
+        "params": {
+          "query": "shipping delays"
+        },
+        "observation": [
+          {
+            "id": "KB-002",
+            "title": "Shipping Delays",
+            "content": "Due to high demand, some orders may experience a 2-3 day delay in shipping."
+          }
+        ],
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.5744428634643555
+          }
+        ],
+        "reasoning": "Provide expected timeline context to set customer expectations"
+      },
+      {
+        "step": 4,
+        "thought": "Send concrete status response after evidence collection.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1016",
+          "message": "We checked your order ORD-2016 and shared the latest status update."
+        },
+        "observation": {
+          "status": "sent",
+          "ticket_id": "TKT-1016"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.8698480129241943
+          }
+        ],
+        "reasoning": "Deliver status update to customer with policy context"
+      }
+    ],
+    "decision": "order_status_updated:ORD-2016",
+    "confidence": 0.95,
+    "duration": 3.089545249938965,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1017",
+    "processed_at": "2026-04-18T09:47:49.559944Z",
+    "classification": {
+      "category": "order_status",
+      "urgency": "high",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user17@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5017",
+          "name": "Customer 17",
+          "email": "user17@example.com",
+          "tier": "silver",
+          "phone": "+1-555-01017"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.1445646286010742
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Fetch latest shipment status from order records.",
+        "action": "get_order",
+        "params": {
+          "order_id": "ORD-2017"
+        },
+        "observation": {
+          "order_id": "ORD-2017",
+          "customer_id": "CUST-5017",
+          "status": "shipped",
+          "items": [
+            {
+              "product_id": "PROD-3017",
+              "quantity": 1,
+              "price": 49.99
+            }
+          ],
+          "total_amount": 49.99,
+          "delivery_date": "2026-04-10"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for get_order unavailable",
+            "duration": 1.4425957202911377
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 1.0037767887115479
+          }
+        ],
+        "reasoning": "Current order status needed to answer customer inquiry accurately"
+      },
+      {
+        "step": 3,
+        "thought": "Gather policy context for transit delay communication.",
+        "action": "search_knowledge_base",
+        "params": {
+          "query": "shipping delays"
+        },
+        "observation": [
+          {
+            "id": "KB-002",
+            "title": "Shipping Delays",
+            "content": "Due to high demand, some orders may experience a 2-3 day delay in shipping."
+          }
+        ],
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.4631273746490479
+          }
+        ],
+        "reasoning": "Provide expected timeline context to set customer expectations"
+      },
+      {
+        "step": 4,
+        "thought": "Send concrete status response after evidence collection.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1017",
+          "message": "We checked your order ORD-2017 and shared the latest status update."
+        },
+        "observation": {
+          "status": "sent",
+          "ticket_id": "TKT-1017"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.3342924118041992
+          }
+        ],
+        "reasoning": "Deliver status update to customer with policy context"
+      }
+    ],
+    "decision": "order_status_updated:ORD-2017",
+    "confidence": 0.95,
+    "duration": 5.8903443813323975,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1018",
+    "processed_at": "2026-04-18T09:47:56.058828Z",
+    "classification": {
+      "category": "product_info",
+      "urgency": "high",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user18@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5018",
+          "name": "Customer 18",
+          "email": "user18@example.com",
+          "tier": "gold",
+          "phone": "+1-555-01018"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.6953849792480469
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Need product metadata before answering technical question.",
+        "action": "get_product",
+        "params": {
+          "product_id": "PROD-3018"
+        },
+        "observation": {
+          "product_id": "PROD-3018",
+          "name": "Gizmo Tool 18",
+          "description": "High-quality gizmo tool for general use.",
+          "warranty_period": "12 months",
+          "stock_status": "in_stock"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for get_product unavailable",
+            "duration": 0.30434441566467285
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 1.1764297485351562
+          }
+        ],
+        "reasoning": "Product specifications and metadata required for accurate response"
+      },
+      {
+        "step": 3,
+        "thought": "Confirm official warranty policy wording.",
+        "action": "search_knowledge_base",
+        "params": {
+          "query": "warranty"
+        },
+        "observation": [
+          {
+            "id": "KB-003",
+            "title": "Warranty Information",
+            "content": "All mechanical products come with a 1-year limited warranty against manufacturing defects."
+          }
+        ],
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "Network Timeout on search_knowledge_base after 1.0s",
+            "duration": 2.2516696453094482
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 0.603330135345459
+          }
+        ],
+        "reasoning": "Use authoritative policy source, not memory, to ensure accuracy"
+      },
+      {
+        "step": 4,
+        "thought": "Provide accurate policy-backed customer reply.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1018",
+          "message": "Product PROD-3018 includes standard warranty coverage per policy."
+        },
+        "observation": {
+          "status": "sent"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "Network Timeout on send_reply after 1.0s",
+            "duration": 1.4087297916412354
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.8844492435455322
+          },
+          {
+            "attempt": 3,
+            "status": "success",
+            "duration": 1.3022501468658447
+          }
+        ],
+        "reasoning": "Deliver policy-backed product information to resolve inquiry"
+      }
+    ],
+    "decision": "product_info_resolved:PROD-3018",
+    "confidence": 0.95,
+    "duration": 11.196457386016846,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1019",
+    "processed_at": "2026-04-18T09:47:58.666530Z",
+    "classification": {
+      "category": "refund",
+      "urgency": "low",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user19@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5019",
+          "name": "Customer 19",
+          "email": "user19@example.com",
+          "tier": "silver",
+          "phone": "+1-555-01019"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.2698979377746582
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Need order details before evaluating refund action.",
+        "action": "get_order",
+        "params": {
+          "order_id": "ORD-2019"
+        },
+        "observation": {
+          "customer_id": "CUST-5019",
+          "status": "shipped",
+          "items": [
+            {
+              "product_id": "PROD-3019",
+              "quantity": 1,
+              "price": 49.99
+            }
+          ]
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.1532645225524902
+          }
+        ],
+        "reasoning": "Order amount and status required to validate refund amount and eligibility"
+      },
+      {
+        "step": 3,
+        "thought": "Verify whether this order qualifies for a refund.",
+        "action": "check_refund_eligibility",
+        "params": {
+          "order_id": "ORD-2019"
+        },
+        "observation": {
+          "error": "Tool check_refund_eligibility failed after retries"
+        },
+        "status": "fatal_failure",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.559751033782959
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "Network Timeout on check_refund_eligibility after 1.0s",
+            "duration": 2.3861968517303467
+          },
+          {
+            "attempt": 3,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for check_refund_eligibility unavailable",
+            "duration": 1.2486047744750977
+          }
+        ],
+        "reasoning": "Eligibility check is a compliance gate - must satisfy policy before issuing refund"
+      },
+      {
+        "step": 4,
+        "thought": "Cannot safely issue refund; escalate with structured context.",
+        "action": "escalate",
+        "params": {
+          "ticket_id": "TKT-1019",
+          "summary": "{\"ticket_id\": \"TKT-1019\", \"category\": \"refund\", \"urgency\": \"low\", \"reason\": \"Refund ineligible or insufficient data\", \"recent_observations\": [\"{'customer_id': 'CUST-5019', 'name': 'Customer 19', 'email': 'user19@example.com', 'tier': 'silver', 'phone': '+1-555-01019'}\", \"{'customer_id': 'CUST-5019', 'status': 'shipped', 'items': [{'product_id': 'PROD-3019', 'quantity': 1, 'price': 49.99}]}\", \"{'error': 'Tool check_refund_eligibility failed after retries'}\"], \"customer_email\": \"user19@example.com\"}",
+          "priority": "medium"
+        },
+        "observation": {
+          "status": "escalated",
+          "ticket_id": "TKT-1019",
+          "priority": "medium"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "Network Timeout on escalate after 1.0s",
+            "duration": 2.1627368927001953
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 1.4862251281738281
+          }
+        ],
+        "reasoning": "Ineligible or insufficient data: human review required for refund decision"
+      },
+      {
+        "step": 5,
+        "thought": "Acknowledge escalation to keep customer informed.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1019",
+          "message": "Your case was escalated to a specialist for review."
+        },
+        "observation": {
+          "status": "sent",
+          "ticket_id": "TKT-1019"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.121476650238037
+          }
+        ]
+      }
+    ],
+    "decision": "escalated_refund_case",
+    "confidence": 0.9,
+    "duration": 13.449459552764893,
+    "status": "success"
+  },
+  {
+    "ticket_id": "TKT-1020",
+    "processed_at": "2026-04-18T09:47:53.567680Z",
+    "classification": {
+      "category": "refund",
+      "urgency": "high",
+      "resolvability": "auto",
+      "error": null
+    },
+    "reasoning_chain": [
+      {
+        "step": 1,
+        "thought": "Need customer profile for entitlement and priority checks.",
+        "action": "get_customer",
+        "params": {
+          "email": "user20@example.com"
+        },
+        "observation": {
+          "customer_id": "CUST-5020",
+          "name": "Customer 20",
+          "phone": "+1-555-01020"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for get_customer unavailable",
+            "duration": 0.9904606342315674
+          },
+          {
+            "attempt": 2,
+            "status": "success",
+            "duration": 1.2702226638793945
+          }
+        ],
+        "reasoning": "Verify customer tier and account status for policy eligibility gates"
+      },
+      {
+        "step": 2,
+        "thought": "Need order details before evaluating refund action.",
+        "action": "get_order",
+        "params": {
+          "order_id": "ORD-2020"
+        },
+        "observation": {
+          "order_id": "ORD-2020",
+          "customer_id": "CUST-5020",
+          "status": "delivered",
+          "items": [
+            {
+              "product_id": "PROD-3020",
+              "quantity": 1,
+              "price": 49.99
+            }
+          ],
+          "total_amount": 49.99,
+          "delivery_date": "2026-04-10"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.27778100967407227
+          }
+        ],
+        "reasoning": "Order amount and status required to validate refund amount and eligibility"
+      },
+      {
+        "step": 3,
+        "thought": "Verify whether this order qualifies for a refund.",
+        "action": "check_refund_eligibility",
+        "params": {
+          "order_id": "ORD-2020"
+        },
+        "observation": {
+          "eligible": true,
+          "reason": "Order delivered and within timeframe"
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 0.26708102226257324
+          }
+        ],
+        "reasoning": "Eligibility check is a compliance gate - must satisfy policy before issuing refund"
+      },
+      {
+        "step": 4,
+        "thought": "Eligibility is positive; execute refund transaction.",
+        "action": "issue_refund",
+        "params": {
+          "order_id": "ORD-2020",
+          "amount": 49.99
+        },
+        "observation": {
+          "status": "success",
+          "order_id": "ORD-2020",
+          "refunded_amount": 49.99
+        },
+        "status": "success",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "success",
+            "duration": 1.5028636455535889
+          }
+        ],
+        "reasoning": "Only execute financial action after passing eligibility gate"
+      },
+      {
+        "step": 5,
+        "thought": "Notify customer after performing financial action.",
+        "action": "send_reply",
+        "params": {
+          "ticket_id": "TKT-1020",
+          "message": "Refund approved for ORD-2020."
+        },
+        "observation": {
+          "error": "Tool send_reply failed after retries"
+        },
+        "status": "fatal_failure",
+        "attempts": [
+          {
+            "attempt": 1,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for send_reply unavailable",
+            "duration": 0.41065192222595215
+          },
+          {
+            "attempt": 2,
+            "status": "failed",
+            "error": "502 Bad Gateway: Upstream server for send_reply unavailable",
+            "duration": 0.5864923000335693
+          },
+          {
+            "attempt": 3,
+            "status": "failed",
+            "error": "CRITICAL: Upstream API returned corrupted schema",
+            "duration": 0.9493799209594727
+          }
+        ],
+        "reasoning": "Customer acknowledgment required after successful financial transaction"
+      }
+    ],
+    "decision": "refund_issued:ORD-2020",
+    "confidence": 0.9,
+    "duration": 8.30138087272644,
+    "status": "success"
+  }
+]

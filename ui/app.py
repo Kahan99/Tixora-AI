@@ -3,7 +3,6 @@ import asyncio
 import json
 import os
 import pandas as pd
-from datetime import datetime
 import time
 import sys
 
@@ -12,6 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from main import process_ticket
 from agent.classifier import classify_ticket
+from tools.decision_utils import is_escalated_decision
 
 # --- UI CONFIGURATION ---
 LOGO_PATH = os.path.join(os.getcwd(), "assets", "logo.png")
@@ -147,7 +147,7 @@ def get_enriched_status(res):
     chain = res.get('reasoning_chain', [])
     decision = str(res.get('decision', '')).lower()
     
-    if "escalat" in decision:
+    if is_escalated_decision(decision):
         return "Escalated", "🔴", "status-escalated"
     
     # Analyze internal step health
@@ -218,7 +218,7 @@ with st.container():
     total = len(st.session_state.tickets)
     results = st.session_state.results
     processed = len([r for r in results if r.get('status') != 'running'])
-    successes = len([r for r in results if "escalate" not in str(r.get('decision')).lower()])
+    successes = len([r for r in results if not is_escalated_decision(r.get('decision', ''))])
     total_steps = sum([len(r.get('reasoning_chain', [])) for r in results])
     retry_count = sum([1 for r in results for step in r.get('reasoning_chain', []) if len(step.get('attempts', [])) > 1])
 

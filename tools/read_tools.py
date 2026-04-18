@@ -1,6 +1,5 @@
 from mocks.mock_data import MOCK_CUSTOMERS, MOCK_ORDERS, MOCK_PRODUCTS, MOCK_KB
 from mocks.failure_simulator import simulate_failure
-import asyncio
 
 async def get_customer(email: str):
     """Retrieves customer details by email."""

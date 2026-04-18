@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import time
+import argparse
 from datetime import datetime
 try:
     from dotenv import load_dotenv
@@ -13,6 +14,8 @@ load_dotenv()
 
 from agent.classifier import classify_ticket
 from agent.react_loop import run_react_loop
+from tools.decision_utils import is_escalated_decision
+from tools.metrics_collector import MetricsCollector
 
 async def process_ticket(ticket: dict, ticket_semaphore: asyncio.Semaphore):
     """
@@ -58,9 +61,24 @@ async def process_ticket(ticket: dict, ticket_semaphore: asyncio.Semaphore):
             }
 
 async def main():
-    import sys
-    # Allow passing a custom ticket file via CLI
-    ticket_file = sys.argv[1] if len(sys.argv) > 1 else "data/tickets.json"
+    parser = argparse.ArgumentParser(description="Tixora-AI ticket processor")
+    parser.add_argument("ticket_file", nargs="?", default="data/tickets.json")
+    parser.add_argument("--deterministic", "-d", action="store_true")
+    parser.add_argument("--seed", "-s", type=int, default=42)
+    parser.add_argument("--verbose", "-v", action="store_true")
+    args = parser.parse_args()
+
+    ticket_file = args.ticket_file
+    deterministic = args.deterministic
+    chaos_seed = args.seed
+    verbose = args.verbose
+    
+    # Set environment variables for deterministic/verbose mode
+    if deterministic:
+        os.environ["DETERMINISTIC_MODE"] = "true"
+        os.environ["CHAOS_SEED"] = str(chaos_seed)
+    if verbose:
+        os.environ["AGENT_VERBOSE"] = "true"
     
     if not os.path.exists(ticket_file):
         print(f"Error: Ticket file {ticket_file} not found.")
@@ -73,6 +91,10 @@ async def main():
         tickets = loaded[:max_tickets] if max_tickets > 0 else loaded
     
     print(f"--- Tixora-AI Orchestrator ---")
+    if deterministic:
+        print(f"(Running in DETERMINISTIC mode with seed={chaos_seed})")
+    print(f"Processing {len(tickets)} tickets...")
+    
     start_time = time.time()
     
     # Process concurrently with a tunable cap.
@@ -98,18 +120,43 @@ async def main():
         else:
             normalized_results.append(item)
     
-    total_time = time.time() - start_time
+    # Compute metrics
+    metrics_collector = MetricsCollector()
+    for result in normalized_results:
+        classification = result.get("classification", {})
+        category = classification.get("category", "other")
+        metrics_collector.record_ticket(
+            ticket_id=result.get("ticket_id", "unknown"),
+            category=category,
+            decision=result.get("decision", "unknown"),
+            confidence=result.get("confidence", 0.0),
+            reasoning_chain=result.get("reasoning_chain", []),
+            duration=result.get("duration", 0.0)
+        )
     
-    # Save Audit Log
-    os.makedirs("logs", exist_ok=True)
-    with open("logs/audit_log.json", "w") as f:
+    # Write audit log
+    audit_log_path = "logs/audit_log.json"
+    os.makedirs(os.path.dirname(audit_log_path), exist_ok=True)
+    with open(audit_log_path, "w") as f:
         json.dump(normalized_results, f, indent=2)
-
-    success_count = len([r for r in normalized_results if r.get("status") == "success"])
+    
+    # Export metrics
+    metrics_collector.export_metrics()
+    
+    # Print summary
+    total_duration = time.time() - start_time
+    summary = metrics_collector.get_summary()
+    
+    success_count = len([r for r in normalized_results if not is_escalated_decision(r.get("decision", ""))])
     failed_count = len(normalized_results) - success_count
     
-    print(f"Tixora-AI: Processing Finished. Audit log saved to logs/audit_log.json")
-    print(f"Final Report: success={success_count}, failed={failed_count}, total={len(normalized_results)}, duration={total_time:.2f}s")
+    print(f"Tixora-AI: Processing Finished. Audit log saved to {audit_log_path}")
+    print(f"Final Report: success={success_count}, failed={failed_count}, total={len(normalized_results)}, duration={total_duration:.2f}s")
+    
+    if verbose:
+        print("\nDetailed Metrics:")
+        print(json.dumps(summary, indent=2))
 
 if __name__ == "__main__":
     asyncio.run(main())
+
