@@ -44,9 +44,10 @@ def _local_classify_ticket(ticket: dict) -> dict:
 
 async def classify_ticket(ticket: dict) -> dict:
     """
-    Classifies a ticket into categories, urgency, and resolvability using Groq and Pydantic validation.
+    Classify an incoming ticket.
+    We default to local heuristics for speed and reliability, and only use LLM mode when configured.
     """
-    # Fast deterministic mode (default) avoids external dependency failures.
+    # Local mode is the default so the system keeps running even without external AI services.
     if os.getenv("AGENT_MODE", "local").lower() != "llm" or client is None:
         return _local_classify_ticket(ticket)
 
@@ -81,7 +82,7 @@ async def classify_ticket(ticket: dict) -> dict:
             text = response.choices[0].message.content.strip()
             data = json.loads(text)
             
-            # Validate with Pydantic
+            # Validate external output before we trust it.
             validated = TicketClassification(**data)
             return validated.model_dump()
             

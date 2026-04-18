@@ -28,8 +28,8 @@ def _local_confidence(reasoning_chain: list, final_decision: str) -> float:
 
 async def get_confidence_score(ticket: dict, reasoning_chain: list, final_decision: str) -> float:
     """
-    Evaluates the confidence of the resolution based on the history using Groq.
-    Returns a score between 0.0 and 1.0.
+    Score how confident we are in the final resolution.
+    Low-confidence outcomes are escalated so risky decisions don't ship automatically.
     """
     history_summary = "\n".join([f"Step {s.get('step', '?')}: {s.get('action', 'thought')} -> {s.get('status', 'N/A')}" for s in reasoning_chain])
 

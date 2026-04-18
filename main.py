@@ -19,8 +19,8 @@ from tools.metrics_collector import MetricsCollector
 
 async def process_ticket(ticket: dict, ticket_semaphore: asyncio.Semaphore):
     """
-    Workflow for a single ticket. Independent state guarantees thread-safety.
-    Enforces a strict concurrency limit to respect Groq API Rate Limits.
+    Process one ticket end-to-end.
+    Each task runs with isolated state, and the semaphore keeps concurrency within safe limits.
     """
     async with ticket_semaphore:
         ticket_id = ticket.get('ticket_id', 'UNKNOWN')
@@ -47,7 +47,7 @@ async def process_ticket(ticket: dict, ticket_semaphore: asyncio.Semaphore):
             return result
             
         except Exception as e:
-            # Prevent individual ticket failures from crashing the entire batch
+            # One bad ticket shouldn't take down the whole run. Capture it and move on.
             return {
                 "ticket_id": ticket_id,
                 "processed_at": datetime.utcnow().isoformat() + "Z",
@@ -73,7 +73,7 @@ async def main():
     chaos_seed = args.seed
     verbose = args.verbose
     
-    # Set environment variables for deterministic/verbose mode
+    # Let operators toggle deterministic chaos and verbose logging from the CLI.
     if deterministic:
         os.environ["DETERMINISTIC_MODE"] = "true"
         os.environ["CHAOS_SEED"] = str(chaos_seed)
@@ -84,7 +84,7 @@ async def main():
         print(f"Error: Ticket file {ticket_file} not found.")
         return
 
-    # Batch load tickets for processing.
+    # Load the ticket batch. Respect MAX_TICKETS when we want a quick subset run.
     max_tickets = int(os.getenv("MAX_TICKETS", "0"))
     with open(ticket_file, "r") as f:
         loaded = json.load(f)
@@ -97,7 +97,7 @@ async def main():
     
     start_time = time.time()
     
-    # Process concurrently with a tunable cap.
+    # Process tickets in parallel using asyncio with a configurable concurrency limit.
     max_concurrency = int(os.getenv("MAX_CONCURRENCY", "5"))
     ticket_semaphore = asyncio.Semaphore(max_concurrency)
     tasks = [process_ticket(t, ticket_semaphore) for t in tickets]

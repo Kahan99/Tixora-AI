@@ -1,10 +1,10 @@
 
 ================================================================================
-TIXORA-AI: HACKATHON EVALUATION REPORT
+TIXORA-AI: OPERATIONAL EVALUATION REPORT
 ================================================================================
 
-Generated: 2026-04-18T09:47:58.819016Z
-Evaluation Time: 39.77s
+Generated: 2026-04-18T11:09:52.000020Z
+Evaluation Time: 36.20s
 
 --------------------------------------------------------------------------------
 1. EXECUTION PIPELINE
@@ -22,15 +22,15 @@ Evaluation Time: 39.77s
 3. PERFORMANCE METRICS
 --------------------------------------------------------------------------------
   Tickets Processed:          20
-  Success Rate:               50.0%
-  Escalation Rate:            50.0%
-  Avg Response Time:          8.69s
+  Success Rate:               55.0%
+  Escalation Rate:            45.0%
+  Avg Response Time:          7.75s
 
   Category Breakdown:
-    refund         :   9 tickets,  33.3% success, conf=0.92
-    product_info   :   3 tickets, 100.0% success, conf=0.95
+    refund         :   9 tickets,  44.4% success, conf=0.92
+    product_info   :   3 tickets, 100.0% success, conf=0.88
     order_status   :   4 tickets, 100.0% success, conf=0.95
-    complaint      :   4 tickets,   0.0% success, conf=0.89
+    complaint      :   4 tickets,   0.0% success, conf=0.88
 
 --------------------------------------------------------------------------------
 4. OVERALL ASSESSMENT

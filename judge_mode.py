@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-Judge Mode: Comprehensive Hackathon Evaluation Script
+Evaluation Mode: End-to-End Operational Validation
 
 This script runs the complete evaluation suite:
 1. Deterministic batch processing with chaos injection
 2. Autonomous agent compliance check
 3. Metrics summary and validation
-4. Final report for judge review
+4. Final operational report
 
-Single command to conduct full hackathon evaluation.
+Single command to run a full system validation pass.
 """
 
 import subprocess
@@ -124,11 +124,11 @@ def generate_report(
     metrics_analysis: dict,
     exec_time: float
 ) -> str:
-    """Generate final judge report."""
+    """Generate the final operational report."""
     
     report = []
     report.append("\n" + "=" * 80)
-    report.append("TIXORA-AI: HACKATHON EVALUATION REPORT")
+    report.append("TIXORA-AI: OPERATIONAL EVALUATION REPORT")
     report.append("=" * 80)
     
     report.append(f"\nGenerated: {datetime.utcnow().isoformat()}Z")
@@ -218,9 +218,9 @@ def generate_report(
 
 
 def main():
-    """Run full judge evaluation."""
+    """Run the full operational evaluation."""
     
-    print_header("TIXORA-AI HACKATHON JUDGE MODE")
+    print_header("TIXORA-AI OPERATIONAL EVALUATION MODE")
     print("\nInitializing comprehensive evaluation suite...\n")
     
     evaluation_start = time.time()
@@ -272,7 +272,7 @@ def main():
     print(report)
     
     # Save report with UTF-8 encoding to handle special characters
-    with open("judge_report.txt", "w", encoding="utf-8") as f:
+    with open("evaluation_report.txt", "w", encoding="utf-8") as f:
         f.write(report)
     
     # Exit with appropriate code

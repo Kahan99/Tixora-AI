@@ -4,7 +4,7 @@
 ![Architecture](https://img.shields.io/badge/Architecture-Async%20ReAct-blue)
 ![Mode](https://img.shields.io/badge/Mode-Local%20Policy%20First-orange)
 
-Tixora-AI is an Autonomous Support Resolution Agent designed for ShopWave as part of the Ksolves Agentic AI Hackathon 2026. It reads customer support tickets and automates the resolution process using a robust, deterministic Think → Act → Observe ReAct loop. By classifying tickets by category, urgency, and resolvability, it autonomously utilizes a suite of tools to fetch customer data, query the knowledge base, check refund eligibilities, and issue refunds or escalations. The agent uniquely operates with a dual-engine architecture: a primary robust local fallback policy engine requiring zero API keys, and an optionally configurable, high-performance LLM (Groq) reasoning engine.
+Tixora-AI is ShopWave's autonomous support resolution engine. It processes support tickets using a deterministic Think -> Act -> Observe loop, applies policy checks, and either resolves issues automatically or escalates with full context.
 
 ## Architecture
 
@@ -41,77 +41,68 @@ graph TD
 
 ## Reliability Features
 
-1. **Deterministic ReAct Loop**: Implements a robust `Think → Act → Observe` loop ensuring continuous structured progression per ticket.
-2. **Concurrent Execution**: Leverages `asyncio.gather()` alongside a configurable Semaphore to intelligently process all tickets in parallel without resource starvation.
-3. **Resilient Tool Executor**: Every tool execution request goes through a dedicated executor wrapper that natively supports 3 automatic retries paired with exponential backoff (0.5s → 1s → 2s).
-4. **Chaos Engineering Resilience**: Ships with an embedded `failure_simulator` explicitly verifying system robustness against 15% timeouts, 10% 502 Bad Gateway errors, 15% malformed shapes, and 10% partial data streams.
-5. **Dead Letter Queue (DLQ)**: Implements asynchronous DLQ capture pushing critically failed tool interactions to isolated logs preventing entire pipeline crashes.
-6. **Guardian Overrides**: Post-loop confidence scoring evaluates the ReAct session. Any resolution pathway generating a confidence string below `0.7` is overridden with an autonomous escalation hook.
+1. Deterministic ReAct execution keeps decision paths predictable and easy to audit.
+2. Tickets are processed in parallel using asyncio with a configurable concurrency limit.
+3. All tool calls run through a retry wrapper with exponential backoff (0.5s -> 1s -> 2s).
+4. Failure simulation covers timeouts, bad gateways, malformed payloads, and partial data.
+5. Hard failures are written to a dead-letter queue so the full batch can keep running.
+6. Low-confidence resolutions are automatically escalated to a human specialist.
 
 ## Quick Start
-1. Clone the repository
-   ```bash
-   git clone https://github.com/Kahan99/Tixora-AI.git
-   ```
-2. Navigate into the project directory
-   ```bash
-   cd Tixora-AI
-   ```
-3. Create a virtual environment
-   ```bash
-   python -m venv venv
-   ```
-4. Activate the virtual environment
-   ```bash
-   # On Windows
-   .\venv\Scripts\activate
-   
-   # On Mac/Linux
-   source venv/bin/activate
-   ```
-5. Install dependencies
-   ```bash
-   pip install -r requirements.txt
-   ```
-6. Duplicate environment variables template (Optional — not needed for fully local mode)
-   ```bash
-   cp .env.example .env
-   ```
-7. Run the agent natively!
-   ```bash
-   python main.py
-   ```
+
+1. Create a virtual environment
+
+```bash
+python -m venv venv
+```
+
+2. Activate it
+
+```bash
+# Windows
+.\venv\Scripts\activate
+
+# macOS / Linux
+source venv/bin/activate
+```
+
+3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Run the pipeline
+
+```bash
+python main.py
+```
 
 ## Environment Variables
 
-| Variable | Description | Default |
-| :--- | :--- | :--- |
-| `GROQ_API_KEY` | Optional: Your Groq API key to unlock the LLM reasoning features | `""` |
-| `LOG_LEVEL` | Logging verbosity (`DEBUG`, `INFO`, `WARNING`, `ERROR`) | `INFO` |
-| `MAX_CONCURRENCY` | Maximum number of concurrent async routines processing tickets | `5` |
-| `MAX_TICKETS`| Limit the number of tickets to ingest (`0` ingests all available)| `0` |
-| `AGENT_MODE` | Specifies backend reasoning engine ("`local`" or "`llm`") | `local` |
+| Variable          | Description                                         | Default |
+| :---------------- | :-------------------------------------------------- | :------ |
+| `GROQ_API_KEY`    | Optional API key used when `AGENT_MODE=llm`         | `""`    |
+| `LOG_LEVEL`       | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`) | `INFO`  |
+| `MAX_CONCURRENCY` | Max concurrent ticket workers                       | `5`     |
+| `MAX_TICKETS`     | Limit number of tickets (`0` means all)             | `0`     |
+| `AGENT_MODE`      | Reasoning backend (`local` or `llm`)                | `local` |
 
-## Output & Demo
+## Operational Commands
 
-Optional startup arguments let you specify custom data, while additional utilities preview and audit system behaviors: 
 ```bash
-# Process Custom Manual Tickets
+# Run against a custom input file
 python main.py data/manual_test_tickets.json
 
-# View Live Auditing Trace in Terminal
-python demo_viewer.py
+# Validate system compliance from generated audit logs
+python tools/compliance_check.py
 
-# Launch the Streamlit Monitoring UI Dashboard
-streamlit run ui/app.py 
-
-# Execute the local mock Compliance Checks
-python tools/compliance_check.py 
+# Launch monitoring dashboard
+streamlit run ui/app.py
 ```
 
-## Docker Run
+## Docker
 
-You can seamlessly execute the entire environment locally using Docker:
 ```bash
 docker compose -f docker-compose.yml up -d --build
 ```
@@ -120,42 +111,47 @@ docker compose -f docker-compose.yml up -d --build
 
 ```text
 Tixora-AI/
-├── main.py                     # Entry point, asyncio orchestrator
-├── .env.example                # Environment variable template
-├── Dockerfile                  # Containerization instructions
-├── docker-compose.yml          # Docker composition framework
-├── demo_viewer.py              # Pretty-prints audit log to terminal
+├── main.py                     # Async batch orchestrator
+├── .env.example                # Environment template
+├── Dockerfile                  # Container build instructions
+├── docker-compose.yml          # Local container orchestration
+├── architecture.md             # Detailed architecture notes
 ├── agent/
-│   ├── classifier.py           # Local heuristics + optional Groq classifier
-│   ├── confidence.py           # Confidence scoring (local + optional Groq)
-│   ├── react_loop.py           # Core Think→Act→Observe execution loop
-│   └── schemas.py              # Pydantic state/model definition rules
+│   ├── classifier.py           # Ticket classification
+│   ├── confidence.py           # Resolution confidence scoring
+│   ├── react_loop.py           # Think -> Act -> Observe loop
+│   └── schemas.py              # Pydantic models
 ├── data/
-│   ├── manual_test_tickets.json # Extra test tickets inputs
-│   └── tickets.json            # Base 20 mock support tickets inputs
+│   └── tickets.json            # Sample support tickets
 ├── logs/
-│   ├── audit_log.json          # Post-execution tracing output
-│   └── dead_letter_queue.json  # Post-execution critically failed processes 
+│   ├── audit_log.json          # Full execution trace
+│   ├── metrics.json            # Runtime metrics output
+│   └── dead_letter_queue.json  # Hard-failure records
 ├── mocks/
-│   ├── failure_simulator.py    # Chaos engineering injector parameters
-│   └── mock_data.py            # In-memory mock DB (customers, orders, etc.)
+│   ├── failure_simulator.py    # Upstream failure simulation
+│   └── mock_data.py            # In-memory mock data
 ├── tools/
-│   ├── compliance_check.py     # Validates audit log against hackathon rules
-│   ├── read_tools.py           # get_customer, get_order, get_product, etc.
-│   ├── tool_executor.py        # Retry + backoff + schema validation + DLQ
-│   └── write_tools.py          # check_refund_eligibility, issue_refund, etc.
+│   ├── compliance_check.py     # Operational audit validator
+│   ├── decision_utils.py       # Shared decision helpers
+│   ├── metrics_collector.py    # Runtime metrics aggregation
+│   ├── read_tools.py           # Read-side tool implementations
+│   ├── tool_executor.py        # Retry, validation, DLQ handoff
+│   └── write_tools.py          # Write-side tool implementations
 └── ui/
-    └── app.py                  # Streamlit monitoring dashboard GUI
+    └── app.py                  # Streamlit monitoring dashboard
 ```
 
-## Hackathon Compliance Highlights
+## Production Standards
 
-Designed strategically to comfortably accommodate and explicitly satisfy all strict Ksolves Agentic AI Hackathon 2026 rubric requirements:
+1. Minimum evidence depth: each ticket goes through at least 3 tool calls before final decisioning.
+2. Structured traceability: every step records thought, action, params, observation, status, and attempts.
+3. Defensive tool execution: malformed or partial responses are validated before they reach policy logic.
+4. Controlled automation: low-confidence outcomes are escalated with context instead of auto-resolved.
+5. Local-first operation: the pipeline runs without external APIs by default.
 
-*   **Strict Multi-Tool Invocations**: At least `3` specific tool calls per ticket are inherently guaranteed recursively by the underlying loop inside `react_loop.py`.
-*   **Performance Maximization**: All 20 base dataset tickets are successfully ingested and executed in full parallel operation powered natively efficiently via native `asyncio.gather`.
-*   **Chaos Resilient Pipeline**: Provides incredibly graceful failure handling integrating a hard 3-retry attempt maximum enhanced dynamically via exponential backoff paired with a Dead Letter Queue strategy.
-*   **Holistic Execution Auditing**: Every system decision is safely logged sequentially including internal `thought`, exact `action` payload, dynamic `params`, target `observation`, executed `attempts`, and specific terminal `status`.
-*   **Human-In-The-Loop Overrides**: An autonomous safety confidence guardrail executes hard auto-escalations automatically intercepting instances where resulting confidence scores land `< 0.7`.
-*   **Production Secure Best-Practices**: Retains absolutely zero hardcoded API keys by referencing explicitly off standardized `.env` architecture.
-*   **True Zero-Shot Redundancy**: Configures out-of-the-box natively operating in a fully local environment processing completely accurately using zero API Keys inherently.
+## Output Artifacts
+
+- `logs/audit_log.json`: full per-ticket execution trace
+- `logs/metrics.json`: category and tool-level metrics
+- `logs/dead_letter_queue.json`: failure records requiring follow-up
+- `evaluation_report.txt`: end-to-end evaluation output

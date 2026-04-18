@@ -8,8 +8,8 @@ logger = logging.getLogger(__name__)
 
 async def execute_tool(tool_func, **kwargs):
     """
-    Executes a tool with 3 retries and exponential backoff.
-    Failures are handled gracefully and logged at DEBUG level to avoid stderr noise.
+    Run a tool call with automatic retries.
+    We back off exponentially so we don't hammer an upstream service that's already struggling.
     """
     max_retries = 3
     base_delay = 0.5
@@ -20,10 +20,10 @@ async def execute_tool(tool_func, **kwargs):
     for attempt in range(1, max_retries + 1):
         start_time = time.time()
         try:
-            # Check for partial/malformed data simulations (mocked in the simulator)
+            # Simulated upstream failures can return malformed or partial responses.
             result = await tool_func(**kwargs)
             
-            # --- ADVANCED VALIDATION STAGE ---
+            # Validate payload shape before it reaches decision logic.
             if tool_func.__name__ == "search_knowledge_base":
                 if not isinstance(result, (dict, list)):
                     raise ValueError(f"CRITICAL: search_knowledge_base returned invalid type: {type(result)}")
@@ -34,7 +34,7 @@ async def execute_tool(tool_func, **kwargs):
                 if "corrupted" in result or result.get("status_code") == 500:
                     raise ValueError("CRITICAL: Upstream API returned corrupted schema")
 
-            # Partial data is recoverable for this agent; keep it as a soft signal.
+            # Partial payloads are recoverable; log them and continue.
             if isinstance(result, dict):
                 missing_keys = []
                 if tool_func.__name__ == "get_order" and "status" not in result and "error" not in result:
@@ -57,8 +57,7 @@ async def execute_tool(tool_func, **kwargs):
             if attempt < max_retries:
                 logger.debug(f"Attempt {attempt} failed for {tool_func.__name__}: {error_msg}")
             else:
-                # Log final failures at DEBUG level in production to avoid stderr noise
-                # Tool failures are expected and handled by the agent - they're not errors
+                # Final failures are expected in chaos runs; keep noise out of stderr by default.
                 log_level = logging.WARNING if verbose_mode else logging.DEBUG
                 logger.log(log_level, f"Tool {tool_func.__name__} failed after {max_retries} attempts: {error_msg}")
             
@@ -74,11 +73,11 @@ async def execute_tool(tool_func, **kwargs):
                 delay = base_delay * (2 ** (attempt - 1))
                 await asyncio.sleep(delay)
             else:
-                # All retries failed - agent will handle escalation/recovery
+                # Retries are exhausted. Caller decides whether to escalate or continue.
                 return None, attempts
 
 def log_to_dlq(ticket_id, reason, history):
-    """Logs failed ticket to Dead Letter Queue."""
+    """Park a failed ticket in the dead letter queue for later investigation."""
     dlq_path = "logs/dead_letter_queue.json"
     entry = {
         "ticket_id": ticket_id,

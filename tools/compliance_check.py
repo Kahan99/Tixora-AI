@@ -1,3 +1,5 @@
+"""Operational audit validator for ticket-processing output."""
+
 import json
 import os
 import sys
@@ -50,6 +52,7 @@ def _check(data):
             findings.append(f"Ticket {ticket.get('ticket_id', idx)} reasoning_chain is not a list")
             continue
 
+        # We expect at least 3 steps so each decision has enough supporting context.
         if len(chain) < 3:
             findings.append(f"Ticket {ticket.get('ticket_id', idx)} has fewer than 3 reasoning steps")
 

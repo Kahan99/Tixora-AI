@@ -43,8 +43,8 @@ def _build_escalation_summary(ticket: dict, classification: dict, history: list,
 
 async def run_react_loop(ticket: dict, classification: dict):
     """
-    Deterministic Think -> Act -> Observe loop with bounded steps.
-    This path is intentionally local-first so the project can run with a single command.
+    Run a bounded Think -> Act -> Observe loop for one ticket.
+    Local-first execution keeps the pipeline stable even when external AI services are unavailable.
     """
     ticket_id = ticket.get("ticket_id", "UNKNOWN")
     history = []
@@ -55,7 +55,7 @@ async def run_react_loop(ticket: dict, classification: dict):
     ticket_text = f"{subject} {body}"
 
     async def _call_tool(action: str, params: dict, thought: str, reasoning: str = None):
-        """Call a tool with optional explicit reasoning justification."""
+        """Execute one tool step and append a normalized history record."""
         nonlocal step, tool_calls_count
         step += 1
         result, attempts = await execute_tool(TOOL_MAP[action], **params)
@@ -78,7 +78,7 @@ async def run_react_loop(ticket: dict, classification: dict):
             "attempts": attempts,
         }
         
-        # Add explicit reasoning if provided (for explainability)
+        # Keep an explicit rationale when it's available for auditability.
         if reasoning:
             history_entry["reasoning"] = reasoning
         
@@ -229,7 +229,7 @@ async def run_react_loop(ticket: dict, classification: dict):
             await _call_tool(
                 "search_knowledge_base",
                 {"query": "support policy"},
-                "Policy safeguard: ensure minimum evidence-gathering tool depth.",
+                "Ensure sufficient evidence is gathered before reaching a decision.",
                 reasoning="Enforce minimum 3 tool calls per ticket for multi-step reasoning"
             )
 
