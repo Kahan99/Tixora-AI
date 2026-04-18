@@ -1,0 +1,30 @@
+[
+  {
+    "id": "TKT-TEST-001",
+    "subject": "Order Damaged",
+    "body": "I received my order #ORD-2026 today but the item is completely shattered. This is unacceptable! I want a full refund immediately.",
+    "tier": "Gold",
+    "customer_email": "vip_customer@example.com"
+  },
+  {
+    "id": "TKT-TEST-002",
+    "subject": "Where is my stuff?",
+    "body": "Hi, I ordered two days ago (Order #ORD-7788) and haven't seen an update. Can you tell me the status?",
+    "tier": "Silver",
+    "customer_email": "john.doe@example.com"
+  },
+  {
+    "id": "TKT-TEST-003",
+    "subject": "AWFUL SERVICE - NEVER BUYING AGAIN",
+    "body": "I've been waiting for my refund for weeks. Stop wasting my time! I want to talk to a manager or I'm calling my lawyer.",
+    "tier": "Bronze",
+    "customer_email": "angry_user@example.com"
+  },
+  {
+    "id": "TKT-TEST-004",
+    "subject": "Product Compatibility Query",
+    "body": "Does the Tixora-X model work with 220V outlets in Europe? I couldn't find this in the manual.",
+    "tier": "Bronze",
+    "customer_email": "traveler@example.com"
+  }
+]

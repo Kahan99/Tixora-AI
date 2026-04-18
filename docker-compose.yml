@@ -1,8 +1,27 @@
 services:
-  agent:
+  engine:
     build: .
+    image: tixora-ai:latest
+    container_name: tixora-engine
     env_file:
       - .env
     volumes:
       - ./logs:/app/logs
-    restart: "no"
+      - ./data:/app/data
+    command: python main.py
+
+  dashboard:
+    build: .
+    image: tixora-ai:latest
+    container_name: tixora-dashboard
+    depends_on:
+      - engine
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./assets:/app/assets
+    command: streamlit run ui/app.py --server.port=8501 --server.address=0.0.0.0 --server.headless=true

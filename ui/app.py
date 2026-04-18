@@ -93,6 +93,27 @@ st.markdown("""
     .status-escalated { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
     .status-recovery { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
 
+    /* Dashboard Navigation Tabs - High Visibility */
+    button[data-baseweb="tab"] {
+        background-color: transparent !important;
+    }
+    
+    button[data-baseweb="tab"] p {
+        color: #f8fafc !important; /* Bright off-white */
+        font-weight: 700 !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.05em !important;
+        transition: color 0.3s ease !important;
+    }
+
+    button[data-baseweb="tab"]:hover p {
+        color: #38bdf8 !important; /* Cyan on hover */
+    }
+
+    button[data-baseweb="tab"][aria-selected="true"] p {
+        color: #38bdf8 !important; /* Active Tab in Cyan */
+    }
+
     /* Primary Button - High Visibility */
     .stButton>button {
         background-color: #00d4ff !important;
@@ -152,7 +173,7 @@ with st.sidebar:
     else:
         st.image("https://img.icons8.com/parakeet/512/processor.png", width=60)
     st.title("Tixora-AI Engine")
-    st.markdown("`v2.0.0-Hackathon-Premium`", help="Proprietary ReAct reasoning engine with forced schema validation.")
+    st.markdown("`v2.0.0-Enterprise-Production`", help="Proprietary ReAct reasoning engine with forced schema validation.")
     
     st.divider()
     

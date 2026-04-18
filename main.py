@@ -58,13 +58,21 @@ async def process_ticket(ticket: dict, ticket_semaphore: asyncio.Semaphore):
             }
 
 async def main():
-    # Load all tickets by default to satisfy hackathon validation requirements.
+    import sys
+    # Allow passing a custom ticket file via CLI
+    ticket_file = sys.argv[1] if len(sys.argv) > 1 else "data/tickets.json"
+    
+    if not os.path.exists(ticket_file):
+        print(f"Error: Ticket file {ticket_file} not found.")
+        return
+
+    # Batch load tickets for processing.
     max_tickets = int(os.getenv("MAX_TICKETS", "0"))
-    with open("data/tickets.json", "r") as f:
+    with open(ticket_file, "r") as f:
         loaded = json.load(f)
         tickets = loaded[:max_tickets] if max_tickets > 0 else loaded
     
-    print(f"--- Tixora-AI Orchestrator ---\nStarting async processing of {len(tickets)} tickets...")
+    print(f"--- Tixora-AI Orchestrator ---")
     start_time = time.time()
     
     # Process concurrently with a tunable cap.

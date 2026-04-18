@@ -1,10 +1,10 @@
 # Tixora-AI: Autonomous Support Resolution Agent
 
-![Status](https://img.shields.io/badge/Status-Hackathon%20Ready-success)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-success)
 ![Architecture](https://img.shields.io/badge/Architecture-Async%20ReAct-blue)
 ![Mode](https://img.shields.io/badge/Agent-Local%20Policy%20First-orange)
 
-Tixora-AI is an autonomous support resolution agent for the Ksolves Agentic AI Hackathon 2026.
+Tixora-AI is a high-performance, autonomous support resolution agent designed for enterprise-grade ticket automation.
 
 This is **not a chatbot**. It executes a bounded Think -> Act -> Observe loop with real tool actions, retry logic, escalation guardrails, and structured auditing.
 
@@ -88,10 +88,18 @@ We didn't just build an agent; we built the hardened infrastructure required to 
    ```
 
 2. Run the system (single command):
+
    ```bash
    python main.py
    ```
+
    Default mode is fully local and does not require API keys.
+
+3. Optional: launch the monitoring dashboard (bonus UI):
+   ```bash
+   streamlit run ui/app.py
+   ```
+   Then open `http://localhost:8501`.
 
 Optional environment variables:
 
@@ -116,3 +124,29 @@ python demo_viewer.py
 - final decision
 - confidence
 - processing status and duration
+
+Validate hackathon compliance from generated audit logs:
+
+```bash
+python tools/compliance_check.py
+```
+
+---
+
+## Docker Run
+
+Run both the batch engine and dashboard with one command:
+
+```bash
+docker compose -f docker-compose.yml up -d --build
+```
+
+Notes:
+
+- `engine` is a batch worker and exits with code 0 after finishing ticket processing.
+- `dashboard` stays running on port `8501`.
+- If you renamed services and see orphan container warnings, run:
+
+```bash
+docker compose -f docker-compose.yml down --remove-orphans
+```

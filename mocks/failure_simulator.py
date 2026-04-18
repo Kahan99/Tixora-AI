@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 async def simulate_failure(tool_name, data):
     """
-    Chaos Engineering Simulator for Hackathon Evaluation.
+    Chaos Engineering Simulator for Production Reliability Evaluation.
     Injects latency, exceptions, timeouts, and malformed structures.
     """
     # 1. Baseline Network Jitter (simulate real API latency)
