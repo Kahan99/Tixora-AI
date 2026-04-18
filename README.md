@@ -6,6 +6,8 @@
 
 Tixora-AI is ShopWave's autonomous support resolution engine. It processes support tickets using a deterministic Think -> Act -> Observe loop, applies policy checks, and either resolves issues automatically or escalates with full context.
 
+**🌐 Live Demo:** [https://tixora-ai.streamlit.app/](https://tixora-ai.streamlit.app/)
+
 ## Architecture
 
 ```mermaid
