@@ -94,9 +94,6 @@ python main.py
 # Run against a custom input file
 python main.py data/manual_test_tickets.json
 
-# Validate system compliance from generated audit logs
-python tools/compliance_check.py
-
 # Launch monitoring dashboard
 streamlit run ui/app.py
 ```
@@ -131,7 +128,6 @@ Tixora-AI/
 │   ├── failure_simulator.py    # Upstream failure simulation
 │   └── mock_data.py            # In-memory mock data
 ├── tools/
-│   ├── compliance_check.py     # Operational audit validator
 │   ├── decision_utils.py       # Shared decision helpers
 │   ├── metrics_collector.py    # Runtime metrics aggregation
 │   ├── read_tools.py           # Read-side tool implementations
@@ -154,4 +150,3 @@ Tixora-AI/
 - `logs/audit_log.json`: full per-ticket execution trace
 - `logs/metrics.json`: category and tool-level metrics
 - `logs/dead_letter_queue.json`: failure records requiring follow-up
-- `evaluation_report.txt`: end-to-end evaluation output
