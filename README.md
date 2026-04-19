@@ -8,6 +8,22 @@ Tixora-AI is ShopWave's autonomous support resolution engine. It processes suppo
 
 **🌐 Live Demo:** [https://tixora-ai.streamlit.app/](https://tixora-ai.streamlit.app/)
 
+## 🧠 Agent Context
+Tixora-AI is designed specifically as a deterministic, autonomous cognitive agent. Unlike standard LLM chatbots that simply reply to user prompts, Tixora-AI operates internally on a rigorous `Think -> Act -> Observe` cycle (ReAct architecture). It acts as an integration layer between unstructured customer problems and structured backend microservices, ensuring that every resolution is backed by concrete tool observations before a final decision is reached.
+
+## 🎯 Primary Use Case
+This engine is optimized for **high-volume Support environments** (like E-Commerce or SaaS platforms). By automatically ingesting customer ticket streams, it is able to:
+- **Triage and Classify:** Accurately identify incident categories and determine urgency.
+- **Act on Corporate Policies:** Issue refunds, execute profile updates, retrieve tracking status, or invoke internal APIs completely manually.
+- **Fail Gracefully:** Accurately measure its own decision confidence, guaranteeing that ambiguous, complex, or high-risk tickets are routed to a human specialist instead of risking a hallucinated resolution.
+
+## 🚀 How to Use (System Workflow)
+Tixora-AI is deployed as a dual-component engine:
+1. **The Batch Orchestrator (`main.py`)**: The primary mechanism that reads the stream of incoming tickets. It governs the concurrency limit, local/API reasoning paths, applies retry/backoff logic to all tools, and commits detailed structured JSON audit trails. 
+2. **The Monitoring UI (`ui/app.py`)**: A premium Streamlit dashboard acting as the observer console. It displays reasoning node statuses, decision confidence ratios, and allows you to trace exact "Thoughts" the agent had.
+
+**Workflow:** You load a batch of unstructured JSON tickets into the ingestion stream --> run the pipeline using the Streamlit interface (or CLI) --> the agent processes them concurrently in the background and renders real-time forensic logs. See the Quick Start below.
+
 ## Architecture
 
 ```mermaid
